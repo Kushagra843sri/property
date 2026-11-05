@@ -102,3 +102,22 @@ export async function loginAdmin() {
   if (res.status !== 200) throw new Error(`admin login failed ${res.status}`);
   return { session: s, ...a };
 }
+
+let pseq = 0;
+export async function makeProperty(overrides: Record<string, unknown> = {}) {
+  const { Property } = await import('../src/models/property.js');
+  const { makeSlug } = await import('../src/modules/properties/service.js');
+  pseq += 1;
+  const title = (overrides.title as string) ?? `Test Flat ${pseq}`;
+  const doc = await Property.create({
+    title,
+    slug: makeSlug(title),
+    type: 'apartment',
+    purpose: 'buy',
+    price: 5_000_000 + pseq,
+    bhk: 2,
+    address: { city: 'Lucknow', locality: 'Gomti Nagar' },
+    ...overrides,
+  });
+  return doc;
+}

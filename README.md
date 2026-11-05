@@ -45,6 +45,7 @@ placeholder URLs. Production refuses to start with these fallbacks.
 | `TRUST_PROXY`                                                          | Reverse-proxy hops (for correct client IPs)      | `1`                                  | production (must be > 0)                        |
 | `JWT_ACCESS_SECRET`                                                    | Signs access tokens, 32+ chars                   | _(generate)_                         | yes                                             |
 | `JWT_REFRESH_SECRET`                                                   | Signs refresh tokens, 32+ chars                  | _(generate)_                         | yes                                             |
+| `CLIENT_URL`                                                           | Public site URL used in dealer-email links       | `https://example.com`                | no (defaults to first `CORS_ORIGINS`)           |
 | `COOKIE_DOMAIN`                                                        | Cookie domain if client/API are on sibling hosts | `.example.com`                       | no                                              |
 | `MAIL_PROVIDER`                                                        | `console` (dev only) or `resend`                 | `resend`                             | no (default `console`; forbidden in production) |
 | `RESEND_API_KEY`, `MAIL_FROM`                                          | Resend credentials and sender                    | _(provider)_                         | when `MAIL_PROVIDER=resend`                     |

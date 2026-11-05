@@ -24,6 +24,8 @@ const schema = z
     JWT_ACCESS_SECRET: z.string().min(32),
     JWT_REFRESH_SECRET: z.string().min(32),
     COOKIE_DOMAIN: z.string().optional(),
+    // Public site URL used in dealer notification links; defaults to the first CORS origin.
+    CLIENT_URL: z.string().url().optional(),
 
     // Provider adapters. `console` / `mock` are development-only fallbacks.
     MAIL_PROVIDER: z.enum(['console', 'resend']).default('console'),

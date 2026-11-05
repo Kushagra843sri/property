@@ -36,8 +36,9 @@ Browser ──► Next.js (client) ──► Express API (server) ──► Mong
     /models            Mongoose schemas
     /modules           feature modules: auth, users, properties, interests, enquiries, admin
       each: routes.ts · controller.ts · service.ts · schema.ts (zod)
-    /middleware        auth, role, validate, rateLimit, errorHandler
-    /utils             logger, otp, mailer, pagination
+    /middleware        auth, csrf, sanitize, validate, rateLimit, upload, errorHandler
+    /providers         mailer, sms, imageStore (adapters: console/mock for dev, real for prod)
+    /utils             logger, otp, phone, password, csv, pagination
     app.ts · server.ts
 /docs                  ADRs, API reference
 ```
@@ -86,6 +87,18 @@ Unique index: `(user, property)`.
 name, email, phone, message, property? (ref), status, createdAt
 ```
 
+**Otp** (implementation detail of the OTP design)
+
+```
+identifier (unique; normalized email or E.164 phone), channel, codeHash (HMAC), attempts, lastSentAt, expiresAt (TTL)
+```
+
+**RefreshToken** (rotating sessions)
+
+```
+user, tokenHash (HMAC), family, expiresAt (TTL), revokedAt
+```
+
 **AuditLog** (admin actions)
 
 ```
@@ -113,7 +126,7 @@ User (auth required)
 
 Admin (admin role)
 
-- `GET/POST/PATCH/DELETE /admin/properties` · `POST /admin/properties/:id/images`
+- `GET/POST/PATCH/DELETE /admin/properties` · `GET /admin/properties/:id` · `POST/PATCH/DELETE /admin/properties/:id/images` (add / reorder+alt / remove)
 - `GET /admin/users` · `PATCH /admin/users/:id` (status, notes)
 - `GET /admin/interests` (filter by property/user/date)
 - `GET /admin/enquiries` · `PATCH /admin/enquiries/:id`

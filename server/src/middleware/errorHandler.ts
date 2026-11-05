@@ -1,4 +1,5 @@
 import type { ErrorRequestHandler, RequestHandler } from 'express';
+import { MulterError } from 'multer';
 import { AppError } from '../utils/errors.js';
 import { logger } from '../utils/logger.js';
 
@@ -14,7 +15,12 @@ export const errorHandler: ErrorRequestHandler = (err, req, res, _next) => {
   let message = 'Something went wrong';
   let details: unknown;
 
-  if (err instanceof AppError) {
+  if (err instanceof MulterError) {
+    const big = err.code === 'LIMIT_FILE_SIZE';
+    status = big ? 413 : 400;
+    code = big ? 'payload_too_large' : 'bad_request';
+    message = big ? 'File too large' : 'Invalid upload';
+  } else if (err instanceof AppError) {
     ({ status, code, message, details } = err);
   } else if ((err as BodyParserError).type === 'entity.too.large') {
     status = 413;

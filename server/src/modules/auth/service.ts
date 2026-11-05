@@ -123,7 +123,7 @@ export async function verifyOtp(rawIdentifier: string, code: string): Promise<st
   const otp = await Otp.findOneAndUpdate(
     { identifier: id.value, expiresAt: { $gt: new Date() }, attempts: { $lt: OTP_MAX_ATTEMPTS } },
     { $inc: { attempts: 1 } },
-    { new: true },
+    { returnDocument: 'after' },
   );
   if (!otp || !otpMatches(id.value, code, otp.codeHash)) return null;
 
@@ -134,7 +134,7 @@ export async function verifyOtp(rawIdentifier: string, code: string): Promise<st
   const user = await User.findOneAndUpdate(
     { role: 'user', ...(id.channel === 'email' ? { email: id.value } : { phone: id.value }) },
     { $set: id.channel === 'email' ? { emailVerified: true } : { phoneVerified: true } },
-    { new: true },
+    { returnDocument: 'after' },
   );
   return user ? String(user._id) : null;
 }
