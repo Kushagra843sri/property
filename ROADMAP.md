@@ -4,11 +4,11 @@ Claude: work top-down, one item at a time, tick `[x]` when the definition of don
 
 ## Phase 0 — Setup
 
-- [ ] Repo, monorepo folders, TypeScript, ESLint, Prettier, Husky pre-commit
-- [ ] Env validation, `.env.example`, config modules
-- [ ] MongoDB connection, base Express app with helmet, CORS, rate limit, error handler, logger
+- [x] Repo, monorepo folders, TypeScript, ESLint, Prettier, Husky pre-commit
+- [x] Env validation, `.env.example`, config modules
+- [x] MongoDB connection, base Express app with helmet, CORS, rate limit, error handler, logger
 - [ ] Next.js app with design tokens, fonts, layout shell
-- [ ] CI: lint, typecheck, test, audit
+- [x] CI: lint, typecheck, test, audit
 - [ ] Design direction agreed (palette, type, motion tokens) — run `ui-ux-pro-max`, `Hallmark`, `emil-design-eng`; get owner sign-off on wireframes/mood before building pages
 
 ## Phase 1 — Core backend
