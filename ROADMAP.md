@@ -13,13 +13,13 @@ Claude: work top-down, one item at a time, tick `[x]` when the definition of don
 
 ## Phase 1 — Core backend
 
-- [ ] Models: User, Property, Interest, Enquiry, AuditLog (+ indexes)
-- [ ] Auth module: signup, OTP, sessions, refresh, logout, admin login
-- [ ] Properties module: public list/detail with filters + pagination
-- [ ] Interests module (idempotent) + dealer notification
-- [ ] Enquiries module
-- [ ] Admin modules: properties CRUD + image upload, users/leads, interests, enquiries, CSV export, stats
-- [ ] Seed script: admin user + sample properties (clearly fake)
+- [x] Models: User, Property, Interest, Enquiry, AuditLog (+ indexes)
+- [x] Auth module: signup, OTP, sessions, refresh, logout, admin login
+- [x] Properties module: public list/detail with filters + pagination
+- [x] Interests module (idempotent) + dealer notification
+- [x] Enquiries module
+- [x] Admin modules: properties CRUD + image upload, users/leads, interests, enquiries, CSV export, stats
+- [x] Seed script: admin user + sample properties (clearly fake)
 
 ## Phase 2 — Public site
 

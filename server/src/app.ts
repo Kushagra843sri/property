@@ -9,6 +9,7 @@ import { helmetMiddleware } from './config/helmet.js';
 import { logger } from './utils/logger.js';
 import { globalLimiter } from './middleware/rateLimit.js';
 import { sanitize } from './middleware/sanitize.js';
+import { csrfProtection } from './middleware/csrf.js';
 import { errorHandler, notFound } from './middleware/errorHandler.js';
 import { apiRouter } from './routes.js';
 
@@ -39,6 +40,7 @@ export function createApp(): Express {
   app.use(express.json({ limit: BODY_LIMIT }));
   app.use(cookieParser());
   app.use(sanitize);
+  app.use(csrfProtection);
 
   app.use(API_PREFIX, apiRouter);
 
