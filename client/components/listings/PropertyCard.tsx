@@ -81,7 +81,7 @@ export function PropertyCard({ property: p, priority, index = 0 }: Props) {
       </div>
       <span
         aria-hidden
-        className="absolute inset-x-0 bottom-0 h-px origin-left scale-x-0 bg-brass transition-transform duration-500 ease-out group-hover:scale-x-100"
+        className="absolute inset-x-0 bottom-0 h-px origin-left scale-x-0 bg-gold transition-transform duration-500 ease-out group-hover:scale-x-100"
       />
     </article>
   );

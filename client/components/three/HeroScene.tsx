@@ -86,7 +86,7 @@ function Tower({
 function City({ light }: { light: boolean }) {
   const root = useRef<THREE.Group>(null);
   const ink = useMemo(() => cssVar('--forest') || cssVar('--ink'), []);
-  const accent = useMemo(() => cssVar('--brass') || ink, [ink]);
+  const accent = useMemo(() => cssVar('--gold') || ink, [ink]);
   const specs = light ? LIGHT : FULL;
 
   useFrame(({ clock, pointer }) => {

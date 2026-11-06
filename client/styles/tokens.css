@@ -1,24 +1,30 @@
-/* Hallmark · v2.0.0 · theme: Ledger (custom, editorial) · genre: editorial · job: browse + enquire
+/* Hallmark · v2.0.0 · theme: Ledger, retinted green and gold · genre: editorial · job: browse + enquire
    critique: restrained palette, photographs lead, serif prices; motion explains, never decorates
    waive: none */
 
 /* Design tokens. EVERYTHING visual is defined here once; swap the brand by editing this file. */
 :root {
-  /* Brand palette (PLACEHOLDER: no client brand supplied yet) */
-  --paper: #f5f1ea;
-  --paper-raised: #fbf9f5;
-  --paper-sunken: #ece6da;
-  --ink: #14181b;
-  --ink-muted: #4a5250;
-  --line: #d6cfc0;
-  --line-strong: #8d8777;
-  --forest: #1f3d36;
-  --forest-hover: #16302a;
-  --on-forest: #f5f1ea;
-  --brass: #b08a4a; /* decorative only (rules, marks); never body text */
-  --brass-ink: #6b5020; /* brass as readable text */
-  --focus: #1f3d36;
-  --scrim: rgb(20 24 27 / 0.55);
+  /* Brand palette: deep green, gold lettering, white panels (PLACEHOLDER until the real logo/brand
+     guide arrives; the sign shows green + gold). Change colours here only. */
+  --paper: #f5f3ea;
+  --paper-raised: #ffffff; /* white panels */
+  --paper-sunken: #e8e6d8;
+  --ink: #11201a;
+  --ink-muted: #44524b;
+  --line: #d2d5c6;
+  --line-strong: #7b867d;
+  --forest: #0f4a35; /* primary: buttons, links */
+  --forest-hover: #0b3a29;
+  --forest-deep: #0a2e21; /* header / footer background */
+  --on-forest: #ffffff;
+  --on-forest-muted: #c7d5cc;
+  --line-on-dark: #2e5645;
+  --gold: #c9a227; /* decorative only: rules, emblem, big marks */
+  --gold-bright: #e3c45e; /* gold lettering on the dark green */
+  --gold-ink: #6b5200; /* gold as readable text on light surfaces */
+  --focus: #0f4a35;
+  --focus-on-dark: #e3c45e;
+  --scrim: rgb(10 46 33 / 0.6);
 
   /* Semantic */
   --success: #2a6a3b;

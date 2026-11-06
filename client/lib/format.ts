@@ -18,7 +18,9 @@ export function formatArea(value?: number, unit: keyof typeof AREA_UNIT = 'sqft'
 }
 
 const TYPE_LABEL: Record<string, string> = {
-  apartment: 'Apartment',
+  flat: 'Flat',
+  pg: 'PG room',
+  room: 'Furnished room',
   villa: 'Villa',
   house: 'House',
   plot: 'Plot',
@@ -33,7 +35,7 @@ export function formatLocation(a: { locality?: string; city: string }): string {
   return [a.locality, a.city].filter(Boolean).join(', ');
 }
 
-/** "3 BHK apartment" style headline; falls back to the type alone. */
+/** "3 BHK flat" for flats; the plain type label for everything else (BHK means flats only). */
 export function specLine(p: { bhk?: number; type: string }): string {
-  return p.bhk ? `${p.bhk} BHK ${typeLabel(p.type).toLowerCase()}` : typeLabel(p.type);
+  return p.type === 'flat' && p.bhk ? `${p.bhk} BHK flat` : typeLabel(p.type);
 }

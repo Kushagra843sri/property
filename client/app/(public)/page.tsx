@@ -1,10 +1,11 @@
 import Link from 'next/link';
+import { ArrowRight } from 'lucide-react';
 import { PropertyCard } from '@/components/listings/PropertyCard';
 import { Reveal } from '@/components/motion/Reveal';
 import { HeroVisual } from '@/components/three/HeroVisual';
 import { LinkButton } from '@/components/ui/Button';
 import { serverGet } from '@/lib/api';
-import { SITE } from '@/lib/site';
+import { SERVICES, SITE } from '@/lib/site';
 import type { Property } from '@/lib/types';
 
 async function featured(): Promise<Property[] | null> {
@@ -16,18 +17,15 @@ async function featured(): Promise<Property[] | null> {
   }
 }
 
-const STEPS = [
-  {
-    n: '1',
-    title: 'Browse',
-    text: 'Filter by budget, bedrooms and area. Every listing shows its real details.',
-  },
-  {
-    n: '2',
-    title: 'Say you are interested',
-    text: 'One tap tells us which property caught your eye.',
-  },
-  { n: '3', title: 'We call you back', text: 'We answer your questions and arrange a visit.' },
+// Quick entries into the listings. Rent and Buy are deliberately identical in weight.
+const QUICK = [
+  { label: 'PG rooms', href: '/listings?type=pg' },
+  { label: 'Furnished rooms', href: '/listings?type=room' },
+  { label: '1 BHK flats', href: '/listings?type=flat&bhk=1' },
+  { label: '2 BHK flats', href: '/listings?type=flat&bhk=2' },
+  { label: '3 BHK flats', href: '/listings?type=flat&bhk=3' },
+  { label: 'Shops', href: '/listings?type=shop' },
+  { label: 'Offices', href: '/listings?type=office' },
 ];
 
 export default async function HomePage() {
@@ -42,30 +40,82 @@ export default async function HomePage() {
         <div className="lg:col-span-5">
           <h1 id="hero-title" className="text-[length:var(--text-hero)]">
             <span className="line-mask" style={{ ['--i' as string]: 0 }}>
-              <span>Homes worth</span>
+              <span>Buy, rent or</span>
             </span>
             <span className="line-mask" style={{ ['--i' as string]: 1 }}>
-              <span>walking through</span>
+              <span>find a room</span>
             </span>
           </h1>
           <p
             className="fade-up mt-6 max-w-[34ch] text-[length:var(--text-lg)] text-muted"
             style={{ ['--d' as string]: '450ms' }}
           >
-            Browse our current properties, then talk to us directly.
+            Flats, shops, offices, PG and furnished rooms, for sale and rent.
           </p>
           <div className="fade-up mt-8 flex flex-wrap gap-3" style={{ ['--d' as string]: '560ms' }}>
-            <LinkButton href="/listings" size="lg">
-              View properties
+            <LinkButton href="/listings?purpose=buy" size="lg">
+              Buy a property
             </LinkButton>
-            <LinkButton href="/contact" size="lg" variant="secondary">
-              Contact us
+            <LinkButton href="/listings?purpose=rent" size="lg">
+              Rent a property
             </LinkButton>
           </div>
         </div>
         <div className="fade-up lg:col-span-7" style={{ ['--d' as string]: '200ms' }}>
           <HeroVisual poster="/placeholders/hero-poster.svg" />
         </div>
+      </section>
+
+      <section aria-labelledby="find-title" className="container-page pb-4">
+        <h2 id="find-title" className="sr-only">
+          Find a property
+        </h2>
+        <div className="grid gap-4 sm:grid-cols-2">
+          {[
+            {
+              href: '/listings?purpose=buy',
+              title: 'Buy',
+              text: 'Flats, shops and offices for sale.',
+            },
+            {
+              href: '/listings?purpose=rent',
+              title: 'Rent',
+              text: 'Flats, shops, offices, PG and rooms.',
+            },
+          ].map((t) => (
+            <Link
+              key={t.title}
+              href={t.href}
+              className="group flex min-h-28 items-center justify-between gap-4 rounded-lg border border-forest bg-raised p-6 transition-[background-color,color] duration-200 hover:bg-forest hover:text-on-forest"
+            >
+              <span>
+                <span className="block font-display text-[length:var(--text-2xl)] leading-none">
+                  {t.title}
+                </span>
+                <span className="mt-2 block text-muted group-hover:text-on-forest-muted">
+                  {t.text}
+                </span>
+              </span>
+              <ArrowRight
+                aria-hidden
+                className="shrink-0 transition-transform duration-200 group-hover:translate-x-1"
+              />
+            </Link>
+          ))}
+        </div>
+        <ul className="mt-4 flex flex-wrap gap-2" aria-label="Quick links">
+          {QUICK.map((q) => (
+            <li key={q.href}>
+              <Link
+                href={q.href}
+                className="inline-flex min-h-11 items-center rounded-pill border border-line-strong bg-raised px-4 text-[0.9375rem] transition-colors duration-150 hover:border-forest hover:text-forest"
+                style={{ borderRadius: 'var(--r-pill)' }}
+              >
+                {q.label}
+              </Link>
+            </li>
+          ))}
+        </ul>
       </section>
 
       <section aria-labelledby="featured-title" className="container-page py-12 sm:py-16">
@@ -103,26 +153,24 @@ export default async function HomePage() {
         )}
       </section>
 
-      <section aria-labelledby="how-title" className="bg-sunken py-16 sm:py-20">
+      <section aria-labelledby="services-title" className="bg-sunken py-16 sm:py-20">
         <div className="container-page grid gap-10 lg:grid-cols-12">
           <Reveal className="lg:col-span-4">
-            <h2 id="how-title" className="text-[length:var(--text-2xl)]">
-              How it works
+            <h2 id="services-title" className="text-[length:var(--text-2xl)]">
+              What we do
             </h2>
           </Reveal>
-          <ol className="grid gap-8 sm:grid-cols-3 lg:col-span-8">
-            {STEPS.map((s, i) => (
-              <li key={s.n}>
+          <ul className="grid gap-8 sm:grid-cols-3 lg:col-span-8">
+            {SERVICES.map((s, i) => (
+              <li key={s.title}>
                 <Reveal delay={i * 70}>
-                  <p aria-hidden className="font-display text-[3rem] leading-none text-brass-ink">
-                    {s.n}
-                  </p>
-                  <h3 className="mt-3 text-xl">{s.title}</h3>
+                  <span aria-hidden className="block h-px w-10 bg-gold" />
+                  <h3 className="mt-4 text-xl">{s.title}</h3>
                   <p className="mt-2 text-muted">{s.text}</p>
                 </Reveal>
               </li>
             ))}
-          </ol>
+          </ul>
         </div>
       </section>
 

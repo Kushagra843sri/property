@@ -11,9 +11,13 @@
   --color-line-strong: var(--line-strong);
   --color-forest: var(--forest);
   --color-forest-hover: var(--forest-hover);
+  --color-forest-deep: var(--forest-deep);
+  --color-on-forest-muted: var(--on-forest-muted);
+  --color-line-on-dark: var(--line-on-dark);
+  --color-gold-bright: var(--gold-bright);
   --color-on-forest: var(--on-forest);
-  --color-brass: var(--brass);
-  --color-brass-ink: var(--brass-ink);
+  --color-gold: var(--gold);
+  --color-gold-ink: var(--gold-ink);
   --color-success: var(--success);
   --color-success-bg: var(--success-bg);
   --color-warn: var(--warn);
@@ -69,6 +73,10 @@ p {
   outline: 2px solid var(--focus);
   outline-offset: 3px;
   border-radius: var(--r-sm);
+}
+/* Dark surfaces (header, footer) get a gold focus ring so it stays visible. */
+.on-dark :focus-visible {
+  outline-color: var(--focus-on-dark);
 }
 ::selection {
   background: var(--forest);

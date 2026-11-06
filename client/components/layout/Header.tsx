@@ -29,7 +29,7 @@ export function Header() {
 
   const link = (href: string) =>
     cn(
-      'relative inline-flex min-h-11 items-center text-[0.9375rem] after:absolute after:inset-x-0 after:bottom-2 after:h-px after:origin-left after:bg-ink',
+      'relative inline-flex min-h-11 items-center text-[0.9375rem] text-on-forest after:absolute after:inset-x-0 after:bottom-2 after:h-px after:origin-left after:bg-gold-bright',
       'after:scale-x-0 after:transition-transform after:duration-300 after:ease-out hover:after:scale-x-100',
       pathname.startsWith(href) && 'after:scale-x-100',
     );
@@ -37,8 +37,8 @@ export function Header() {
   return (
     <header
       className={cn(
-        'sticky top-0 z-40 border-b transition-[background-color,border-color] duration-300',
-        scrolled ? 'border-line bg-paper/95 backdrop-blur-sm' : 'border-transparent bg-paper',
+        'on-dark sticky top-0 z-40 border-b bg-forest-deep text-on-forest transition-[border-color] duration-300',
+        scrolled ? 'border-line-on-dark' : 'border-transparent',
       )}
     >
       <div className="container-page flex h-[var(--header-h)] items-center justify-between gap-4">
@@ -62,27 +62,27 @@ export function Header() {
         <div className="flex items-center gap-2">
           <a
             href={SITE.phoneHref}
-            className="hidden min-h-11 items-center gap-2 px-2 text-[0.9375rem] lg:inline-flex"
+            className="hidden min-h-11 items-center gap-2 px-2 text-[0.9375rem] text-on-forest lg:inline-flex"
           >
             <Phone size={16} aria-hidden /> {SITE.phone}
           </a>
           {ready && user ? (
             <div className="hidden items-center gap-1 md:flex">
               {user.role === 'admin' && (
-                <Link href="/admin" className={buttonClass('ghost')}>
+                <Link href="/admin" className={buttonClass('ghostDark')}>
                   Admin
                 </Link>
               )}
-              <Link href="/account" className={buttonClass('ghost')}>
+              <Link href="/account" className={buttonClass('ghostDark')}>
                 My account
               </Link>
-              <Button variant="secondary" onClick={() => logout()}>
+              <Button variant="onDark" onClick={() => logout()}>
                 Sign out
               </Button>
             </div>
           ) : (
             <Button
-              variant="secondary"
+              variant="onDark"
               className="hidden md:inline-flex"
               onClick={() => openAuth({ mode: 'login' })}
             >
@@ -91,7 +91,7 @@ export function Header() {
           )}
           <button
             type="button"
-            className="grid size-11 place-items-center rounded-md hover:bg-sunken md:hidden"
+            className="grid size-11 place-items-center rounded-md hover:bg-line-on-dark md:hidden"
             aria-expanded={open}
             aria-controls="mobile-menu"
             aria-label={open ? 'Close menu' : 'Open menu'}
@@ -102,13 +102,17 @@ export function Header() {
         </div>
       </div>
 
-      <div id="mobile-menu" hidden={!open} className="border-t border-line bg-paper md:hidden">
+      <div
+        id="mobile-menu"
+        hidden={!open}
+        className="border-t border-line-on-dark bg-forest-deep md:hidden"
+      >
         <nav aria-label="Mobile" className="container-page flex flex-col py-3">
           {NAV.map((n) => (
             <Link
               key={n.href}
               href={n.href}
-              className="flex min-h-12 items-center border-b border-line text-lg"
+              className="flex min-h-12 items-center border-b border-line-on-dark text-lg"
             >
               {n.label}
             </Link>
@@ -117,14 +121,14 @@ export function Header() {
             <>
               <Link
                 href="/account"
-                className="flex min-h-12 items-center border-b border-line text-lg"
+                className="flex min-h-12 items-center border-b border-line-on-dark text-lg"
               >
                 My account
               </Link>
               {user.role === 'admin' && (
                 <Link
                   href="/admin"
-                  className="flex min-h-12 items-center border-b border-line text-lg"
+                  className="flex min-h-12 items-center border-b border-line-on-dark text-lg"
                 >
                   Admin
                 </Link>

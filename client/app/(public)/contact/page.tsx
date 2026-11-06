@@ -38,9 +38,11 @@ export default async function ContactPage({ searchParams }: { searchParams: Sear
 
         <div className="flex flex-col gap-8 lg:col-span-5">
           <address className="flex flex-col gap-1 not-italic">
-            <a href={SITE.phoneHref} className={row}>
-              <Phone size={18} aria-hidden /> {SITE.phone}
-            </a>
+            {SITE.phones.map((p) => (
+              <a key={p.href} href={p.href} className={row}>
+                <Phone size={18} aria-hidden /> {p.display}
+              </a>
+            ))}
             <a href={whatsappLink()} className={row} target="_blank" rel="noopener noreferrer">
               <MessageCircle size={18} aria-hidden /> Chat on WhatsApp
             </a>

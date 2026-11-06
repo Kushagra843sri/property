@@ -6,7 +6,7 @@ import { Search, SlidersHorizontal } from 'lucide-react';
 import {
   BUDGETS,
   FURNISHINGS,
-  TYPES,
+  QUICK_TYPES,
   activeCount,
   toSearchParams,
   type Filters,
@@ -149,37 +149,46 @@ export function FilterBar({ filters }: { filters: Filters }) {
           </fieldset>
 
           <fieldset className="flex flex-wrap items-center gap-2">
-            <legend className="sr-only">Bedrooms</legend>
-            <Chip active={filters.bhk === undefined} onClick={() => apply({ bhk: undefined })}>
-              Any BHK
+            <legend className="sr-only">Property type</legend>
+            <Chip active={!filters.type} onClick={() => apply({ type: undefined, bhk: undefined })}>
+              All types
             </Chip>
-            {BHKS.map((n) => (
+            {QUICK_TYPES.map((t) => (
               <Chip
-                key={n}
-                active={filters.bhk === n}
-                onClick={() => apply({ bhk: filters.bhk === n ? undefined : n })}
+                key={t}
+                active={filters.type === t}
+                onClick={() =>
+                  apply({
+                    type: filters.type === t ? undefined : t,
+                    bhk: t === 'flat' ? filters.bhk : undefined,
+                  })
+                }
               >
-                {n}
+                {typeLabel(t)}
               </Chip>
             ))}
           </fieldset>
+
+          {filters.type === 'flat' && (
+            <fieldset className="flex flex-wrap items-center gap-2">
+              <legend className="sr-only">Bedrooms</legend>
+              <Chip active={filters.bhk === undefined} onClick={() => apply({ bhk: undefined })}>
+                Any BHK
+              </Chip>
+              {BHKS.map((n) => (
+                <Chip
+                  key={n}
+                  active={filters.bhk === n}
+                  onClick={() => apply({ bhk: filters.bhk === n ? undefined : n })}
+                >
+                  {n}
+                </Chip>
+              ))}
+            </fieldset>
+          )}
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <label className="flex flex-col gap-1.5 text-sm font-medium">
-            Property type
-            <Select
-              value={filters.type ?? ''}
-              onChange={(e) => apply({ type: (e.target.value || undefined) as Filters['type'] })}
-            >
-              <option value="">Any type</option>
-              {TYPES.map((t) => (
-                <option key={t} value={t}>
-                  {typeLabel(t)}
-                </option>
-              ))}
-            </Select>
-          </label>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <label className="flex flex-col gap-1.5 text-sm font-medium">
             Budget
             <Select

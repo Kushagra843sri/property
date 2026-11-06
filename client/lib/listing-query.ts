@@ -4,15 +4,19 @@
  */
 
 export const PURPOSES = ['buy', 'rent'] as const;
+// Types the API accepts for filtering; QUICK_TYPES are the ones shown as chips.
 export const TYPES = [
-  'apartment',
+  'flat',
+  'shop',
+  'office',
+  'pg',
+  'room',
   'villa',
   'house',
   'plot',
   'commercial',
-  'office',
-  'shop',
 ] as const;
+export const QUICK_TYPES = ['flat', 'shop', 'office', 'pg', 'room'] as const;
 export const FURNISHINGS = ['unfurnished', 'semi-furnished', 'furnished'] as const;
 export const SORTS = ['newest', 'price_asc', 'price_desc', 'featured'] as const;
 export const STATUSES = ['available', 'sold', 'rented'] as const;
@@ -53,10 +57,12 @@ export function parseFilters(raw: Raw): Filters {
     [minPrice, maxPrice] = [maxPrice, minPrice];
   }
   const q = one(raw, 'q')?.trim().slice(0, 100);
+  const type = pick(TYPES, one(raw, 'type'));
   return {
     purpose: pick(PURPOSES, one(raw, 'purpose')),
-    type: pick(TYPES, one(raw, 'type')),
-    bhk: int(one(raw, 'bhk'), 0, 20),
+    type,
+    // BHK is only meaningful for flats: ignore it for any other (or no) type.
+    bhk: type === 'flat' ? int(one(raw, 'bhk'), 0, 20) : undefined,
     minPrice,
     maxPrice,
     furnishing: pick(FURNISHINGS, one(raw, 'furnishing')),
