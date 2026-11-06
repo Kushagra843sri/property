@@ -1,10 +1,12 @@
 import rateLimit from 'express-rate-limit';
 import { env } from '../config/env.js';
+import { createRateLimitStore } from '../config/rateLimitStore.js';
 
-// shortcut: in-memory store, correct for a single instance only; swap for a shared store
-// (e.g. Redis) before running more than one API process.
-const make = (windowMs: number, limit: number) =>
-  rateLimit({
+// Storage is pluggable (config/rateLimitStore.ts); the default in-memory store suits one process only.
+export const makeLimiter = (windowMs: number, limit: number, prefix = 'rl') => {
+  const store = createRateLimitStore(prefix);
+  return rateLimit({
+    ...(store ? { store } : {}),
     windowMs,
     limit,
     standardHeaders: 'draft-7',
@@ -23,11 +25,14 @@ const make = (windowMs: number, limit: number) =>
       });
     },
   });
+};
+const make = (windowMs: number, limit: number, prefix: string) =>
+  makeLimiter(windowMs, limit, prefix);
 
 const MIN = 60_000;
-export const globalLimiter = make(15 * MIN, 600);
-export const authLimiter = make(15 * MIN, 20);
-export const otpLimiter = make(15 * MIN, 10);
-export const enquiryLimiter = make(15 * MIN, 5);
-export const interestLimiter = make(MIN, 10);
-export const adminLoginLimiter = make(15 * MIN, 8);
+export const globalLimiter = make(15 * MIN, 600, 'global');
+export const authLimiter = make(15 * MIN, 20, 'auth');
+export const otpLimiter = make(15 * MIN, 10, 'otp');
+export const enquiryLimiter = make(15 * MIN, 5, 'enquiry');
+export const interestLimiter = make(MIN, 10, 'interest');
+export const adminLoginLimiter = make(15 * MIN, 8, 'admin-login');

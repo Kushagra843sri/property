@@ -54,7 +54,7 @@ export function EnquiryForm({ propertyId, propertyTitle }: Props) {
         setErrors(serverFieldErrors(err.details));
         setFormError(
           err.status === 429
-            ? 'You have sent several messages already. Please wait a while or call us.'
+            ? 'Too many messages from this device. Please wait a while, or call us.'
             : err.message,
         );
       } else setFormError('Something went wrong. Please try again.');

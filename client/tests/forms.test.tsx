@@ -76,7 +76,7 @@ describe('EnquiryForm', () => {
     render(<EnquiryForm propertyId="not-an-id" />);
     await fill(u);
     await u.click(screen.getByRole('button', { name: 'Send message' }));
-    expect(await screen.findByRole('alert')).toHaveTextContent(/several messages/i);
+    expect(await screen.findByRole('alert')).toHaveTextContent(/too many messages/i);
     expect(api.mock.calls[0]![1].body).not.toHaveProperty('propertyId');
     expect(screen.getByRole('button', { name: 'Send message' })).toBeEnabled(); // can retry
   });

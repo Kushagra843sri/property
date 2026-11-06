@@ -1,0 +1,97 @@
+[
+  {
+    "page": "/",
+    "performance": 91,
+    "accessibility": 100,
+    "bestPractices": 100,
+    "seo": 100,
+    "lcpMs": 3408,
+    "cls": 0,
+    "tbtMs": 117,
+    "failing": [
+      "largest-contentful-paint: 0.66",
+      "max-potential-fid: 0.45",
+      "mainthread-work-breakdown: 0",
+      "largest-contentful-paint-element: 0",
+      "render-blocking-resources: 0.5",
+      "unused-javascript: 0",
+      "legacy-javascript: 0",
+      "legacy-javascript-insight: 0",
+      "network-dependency-tree-insight: 0",
+      "render-blocking-insight: 0"
+    ]
+  },
+  {
+    "page": "/listings",
+    "performance": 87,
+    "accessibility": 100,
+    "bestPractices": 100,
+    "seo": 100,
+    "lcpMs": 3718,
+    "cls": 0,
+    "tbtMs": 150,
+    "failing": [
+      "largest-contentful-paint: 0.57",
+      "max-potential-fid: 0.64",
+      "interactive: 0.89",
+      "mainthread-work-breakdown: 0",
+      "largest-contentful-paint-element: 0",
+      "render-blocking-resources: 0.5",
+      "unused-javascript: 0",
+      "legacy-javascript: 0",
+      "bf-cache: 0",
+      "forced-reflow-insight: 0",
+      "lcp-discovery-insight: 0",
+      "legacy-javascript-insight: 0",
+      "network-dependency-tree-insight: 0",
+      "render-blocking-insight: 0"
+    ]
+  },
+  {
+    "page": "/listings/e2e-shop-1793961563351-f713a1",
+    "performance": 90,
+    "accessibility": 100,
+    "bestPractices": 100,
+    "seo": 100,
+    "lcpMs": 3460,
+    "cls": 0,
+    "tbtMs": 146,
+    "failing": [
+      "largest-contentful-paint: 0.65",
+      "max-potential-fid: 0.58",
+      "largest-contentful-paint-element: 0",
+      "render-blocking-resources: 0.5",
+      "unused-javascript: 0",
+      "legacy-javascript: 0",
+      "bf-cache: 0",
+      "forced-reflow-insight: 0",
+      "lcp-discovery-insight: 0",
+      "legacy-javascript-insight: 0",
+      "network-dependency-tree-insight: 0",
+      "render-blocking-insight: 0"
+    ]
+  },
+  {
+    "page": "/contact",
+    "performance": 91,
+    "accessibility": 100,
+    "bestPractices": 100,
+    "seo": 100,
+    "lcpMs": 3017,
+    "cls": 0,
+    "tbtMs": 175,
+    "failing": [
+      "largest-contentful-paint: 0.77",
+      "max-potential-fid: 0.51",
+      "largest-contentful-paint-element: 0",
+      "render-blocking-resources: 0.5",
+      "unused-javascript: 0",
+      "legacy-javascript: 0",
+      "bf-cache: 0",
+      "forced-reflow-insight: 0",
+      "legacy-javascript-insight: 0",
+      "network-dependency-tree-insight: 0",
+      "render-blocking-insight: 0.5"
+    ]
+  }
+]

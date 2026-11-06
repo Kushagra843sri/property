@@ -98,6 +98,7 @@ async function Results({ filters }: { filters: Filters }) {
 
   return (
     <>
+      <h2 className="sr-only">Results</h2>
       <p className="mb-5 text-muted" aria-live="polite">
         {total} {total === 1 ? 'property' : 'properties'}
         {filters.page > 1 && `, page ${filters.page} of ${totalPages}`}

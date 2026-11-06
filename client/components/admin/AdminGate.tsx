@@ -41,7 +41,10 @@ function AdminLogin({ notAdmin }: { notAdmin: boolean }) {
   }
 
   return (
-    <div className="mx-auto mt-16 w-[min(26rem,calc(100vw-2rem))] rounded-lg border border-line bg-raised p-8 shadow-raised">
+    <main
+      id="main"
+      className="mx-auto mt-16 w-[min(26rem,calc(100vw-2rem))] rounded-lg border border-line bg-raised p-8 shadow-raised"
+    >
       <h1 className="text-3xl">Admin sign in</h1>
       {notAdmin && (
         <p role="alert" className="mt-3 rounded-md bg-warn-bg px-3 py-2 text-sm text-warn">
@@ -72,7 +75,7 @@ function AdminLogin({ notAdmin }: { notAdmin: boolean }) {
           Sign in
         </Button>
       </form>
-    </div>
+    </main>
   );
 }
 

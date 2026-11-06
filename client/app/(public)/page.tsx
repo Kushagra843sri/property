@@ -35,7 +35,7 @@ export default async function HomePage() {
     <>
       <section
         aria-labelledby="hero-title"
-        className="container-page grid items-center gap-10 py-10 sm:py-14 lg:grid-cols-12 lg:gap-12 lg:py-20"
+        className="container-page grid items-center gap-10 pt-10 pb-12 sm:pt-14 lg:grid-cols-12 lg:gap-12 lg:pt-20 lg:pb-[var(--section-gap)]"
       >
         <div className="lg:col-span-5">
           <h1 id="hero-title" className="text-[length:var(--text-hero)]">
@@ -66,7 +66,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section aria-labelledby="find-title" className="container-page pb-4">
+      <section aria-labelledby="find-title" className="container-page pb-[var(--section-gap)]">
         <h2 id="find-title" className="sr-only">
           Find a property
         </h2>
@@ -89,7 +89,7 @@ export default async function HomePage() {
               className="group flex min-h-28 items-center justify-between gap-4 rounded-lg border border-forest bg-raised p-6 transition-[background-color,color] duration-200 hover:bg-forest hover:text-on-forest"
             >
               <span>
-                <span className="block font-display text-[length:var(--text-2xl)] leading-none">
+                <span className="block font-display text-[length:var(--text-section)] leading-none">
                   {t.title}
                 </span>
                 <span className="mt-2 block text-muted group-hover:text-on-forest-muted">
@@ -116,56 +116,51 @@ export default async function HomePage() {
             </li>
           ))}
         </ul>
-      </section>
 
-      <section aria-labelledby="featured-title" className="container-page py-12 sm:py-16">
-        <Reveal>
-          <div className="mb-8 flex items-end justify-between gap-4">
-            <h2 id="featured-title" className="text-[length:var(--text-2xl)]">
-              Featured properties
-            </h2>
-            <Link
-              href="/listings"
-              className="inline-flex min-h-11 items-center text-forest underline underline-offset-4"
-            >
-              See all properties
-            </Link>
-          </div>
-        </Reveal>
-        {items === null ? (
-          <p
-            role="status"
-            className="rounded-lg border border-line bg-raised p-8 text-center text-muted"
-          >
-            Our properties could not be loaded just now. Please refresh in a moment, or call us on{' '}
-            {SITE.phone}.
-          </p>
-        ) : items.length === 0 ? (
-          <p className="rounded-lg border border-line bg-raised p-8 text-center text-muted">
-            New properties are being added. Contact us to hear about them first.
-          </p>
-        ) : (
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {items.map((p, i) => (
-              <PropertyCard key={p.id} property={p} index={i} />
-            ))}
-          </div>
-        )}
-      </section>
-
-      <section aria-labelledby="services-title" className="bg-sunken py-16 sm:py-20">
-        <div className="container-page grid gap-10 lg:grid-cols-12">
-          <Reveal className="lg:col-span-4">
-            <h2 id="services-title" className="text-[length:var(--text-2xl)]">
-              What we do
-            </h2>
+        <div role="group" aria-labelledby="featured-title" className="mt-14">
+          <Reveal>
+            <div className="mb-8 flex flex-wrap items-end justify-between gap-x-4 gap-y-2">
+              <h2 id="featured-title" className="text-[length:var(--text-section)]">
+                Featured properties
+              </h2>
+              <Link
+                href="/listings"
+                className="inline-flex min-h-11 items-center text-forest underline underline-offset-4"
+              >
+                See all properties
+              </Link>
+            </div>
           </Reveal>
-          <ul className="grid gap-8 sm:grid-cols-3 lg:col-span-8">
+          {items === null ? (
+            <p
+              role="status"
+              className="rounded-lg border border-line bg-raised p-8 text-center text-muted"
+            >
+              Our properties could not be loaded just now. Please refresh in a moment, or call us on{' '}
+              {SITE.phone}.
+            </p>
+          ) : items.length === 0 ? (
+            <p className="rounded-lg border border-line bg-raised p-8 text-center text-muted">
+              New properties are being added. Contact us to hear about them first.
+            </p>
+          ) : (
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {items.map((p, i) => (
+                <PropertyCard key={p.id} property={p} index={i} />
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
+      <section aria-label="What we do" className="bg-sunken py-[var(--section-gap)]">
+        <div className="container-page">
+          <ul className="grid gap-8 sm:grid-cols-3">
             {SERVICES.map((s, i) => (
               <li key={s.title}>
                 <Reveal delay={i * 70}>
                   <span aria-hidden className="block h-px w-10 bg-gold" />
-                  <h3 className="mt-4 text-xl">{s.title}</h3>
+                  <h2 className="mt-4 text-[length:var(--text-section)]">{s.title}</h2>
                   <p className="mt-2 text-muted">{s.text}</p>
                 </Reveal>
               </li>
@@ -174,7 +169,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section aria-labelledby="cta-title" className="container-page py-16 sm:py-24">
+      <section aria-labelledby="cta-title" className="container-page py-[var(--section-gap)]">
         <Reveal>
           <div className="grid items-end gap-6 border-t border-ink pt-8 md:grid-cols-[1fr_auto]">
             <h2 id="cta-title" className="max-w-[18ch] text-[length:var(--text-3xl)]">

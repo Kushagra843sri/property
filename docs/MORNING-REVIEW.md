@@ -1,5 +1,43 @@
 # Morning review
 
+## Update: verification and launch prep (second run)
+
+All merged to `main` locally only if the checks below passed. Nothing was deployed or pushed; no live services were called.
+
+**Check results (after the last code change):** server lint/typecheck/build clean, 116 tests; client lint/typecheck/build clean, 25 unit tests; contrast all pairs pass; Playwright 49 passed against the production build (journeys, axe, break-ui, screenshots); `npm audit --audit-level=high` clean in both apps.
+
+**Lighthouse (mobile, production build, simulated slow 4G, `docs/lighthouse/summary.json`)**
+
+| Page        | Performance | Accessibility | Best practices | SEO | LCP   |
+| ----------- | ----------- | ------------- | -------------- | --- | ----- |
+| `/`         | 91          | 100           | 100            | 100 | 3.4 s |
+| `/listings` | 87          | 100           | 100            | 100 | 3.7 s |
+| detail page | 90          | 100           | 100            | 100 | 3.5 s |
+| `/contact`  | 91          | 100           | 100            | 100 | 3.0 s |
+
+First run was 71 to 78 performance (3D chunk loaded on phones, favicon 404, listings heading order). Fixes: 3D hero now loads **only** on screens at least 1024px wide with hover, at least 6 cores and 4 GB, no data-saver, no reduced motion (otherwise the poster; three.js is never downloaded); `app/icon.svg` added; hidden `h2` on results; unused `motion` package removed. **LCP is still above the 2.5 s target in this throttled simulation** (the hero poster); real-device and field data are still needed.
+
+**Skills**
+
+- `animation-performance`, `break-ui`, `find-animation-opportunities`: loaded and applied by hand. Animations use only transform/opacity (plus small colour transitions on buttons), no `transition: all`, no animated blur, no CSS-variable animation, reduced motion honoured, hover motion gated by `(hover: hover)`. One opportunity taken: the "Interest sent" state now fades in (200 ms). Rejected: animating filter results or the nav (frequent, functional).
+- **`review-animations` could not be run: it is marked user-invoked only. Please run `/review-animations` yourself.**
+- `hallmark` + its `sloplint` (with `--render`): fixed an eyebrow heading, script-dependent hidden reveal (now visible by default), pure-white colours (tinted), footer boilerplate, stock error wording. Result on page scope: 0 FAIL. **Remaining REFLEX 49b (long listing titles wrap to two lines at 320px) is intentional**: titles are data and must stay readable. `sloplint` also flags 44c/78 on listings and contact when run as marketing pages; run as `--scope app` they pass (these are tools, not landing pages).
+- break-ui worst case (74-char unbroken word, 140-char title, 80-char locality, 300-char description word, no photos, 5-digit crore price) passes at 320px with no overflow (`client/e2e/breakui.spec.ts`).
+
+**Accessibility (axe via Playwright, WCAG 2.0/2.1/2.2 A and AA plus best practices):** every public page, 404, detail, gallery lightbox, auth dialog, mobile menu, admin login and all admin pages pass at desktop and 360px (`client/e2e/a11y.spec.ts`). Fixed: 404 had no landmark, admin login had no `main`. Keyboard: skip link, visible focus rings, dialog focus stays inside, Escape closes and focus returns to the trigger. Not covered: screen-reader testing by a person.
+
+**Production safety:** `npm run seed` refuses production; demo admin credentials and `@example.com` admins are rejected in production; `npm run create-admin` (or `create-admin:prod`) creates the admin from `ADMIN_EMAIL`/`ADMIN_PASSWORD` and never inserts samples; console mailer, console SMS, mock image store, wildcard CORS and `TRUST_PROXY=0` already fail fast at startup in production (tests in `server/tests/production-safety.test.ts`). `dev:memory` refuses production.
+
+**Rate limiter:** storage now goes through one factory (`server/src/config/rateLimitStore.ts`); in-memory by default, Redis snippet in `docs/deploy.md`; production logs a warning when the memory store is used. No Redis added.
+
+**Launch prep docs:** `docs/deploy.md` (Render API, Vercel website, Atlas, **split-domain cookie/CSRF rules: use `www.` and `api.` on one domain, `COOKIE_DOMAIN=.yourshop.in`; vercel.app + onrender.com will not work**, env checklist, backups, monitoring), `server/Dockerfile`, `docs/admin-guide.md`, `docs/handover.md` (both plain-language drafts).
+
+**Decisions this round:** keep SMS provider mandatory in production (your rule: no console fallback), flagged in deploy.md; Docker image **not built** (no Docker on this machine); `E2E_BASE_URL` lets Playwright test a production build; admin demo credentials live only in `server/src/adminSetup.ts` and are blocked in production; `hero3d` flag still works as before.
+
+**Still not done (Phase 5):** deployment, Sentry/uptime, security checklist walk-through (SECURITY.md section 11 was not run as a checklist; most items are covered by the server tests), real-device performance, legal review, `/review-animations` by you, handover walkthrough.
+
+---
+
 Everything below was done unattended. No deployments, no pushes, no real emails/SMS/uploads (dev adapters only). All work is merged to `main` locally; nothing was pushed (there is no remote).
 
 ## 1. Decisions I made for you
@@ -44,8 +82,8 @@ Everything below was done unattended. No deployments, no pushes, no real emails/
 ## 3. Not verified / known risks
 
 - **Resend, Twilio and Cloudinary adapters have never run against live accounts.** They follow the providers' documented REST APIs.
-- **Rate limiter is in-memory** (single API instance). Use a shared store before scaling out.
-- **Performance is not measured**: no Lighthouse run, no real-device test, no 60fps profiling. The 3D hero is built to be cheap and lazy but is unmeasured. LCP/CLS/INP budgets from STYLE.md are unchecked.
+- **Rate limiter**: in-memory by default (single API instance); pluggable store ready, Redis not wired.
+- **Performance**: Lighthouse mobile now measured (see the update at the top); real-device testing, 60fps profiling and field LCP/INP are still missing, and simulated LCP is above 2.5 s.
 - **Contrast**: every token pair is calculated (`npm run contrast`, also a Vitest test) and passes AA, but only token pairs are checked; text laid over photos and the 3D scene is not.
 - **Accessibility** was reviewed by hand and with Playwright role queries only; no axe/Lighthouse pass and no screen-reader test. Keyboard: skip link, focus rings and the native `<dialog>` focus trap are in place.
 - **Skills**: `ui-ux-pro-max` is not installed. `animation-performance`, `review-animations`, `break-ui` and `find-animation-opportunities` were **not run**; their principles were applied by hand (transform/opacity only, reduced-motion fallback, long text wrapping, empty/error/loading states) and a few edge cases are tested. `hallmark`'s `sloplint` was not run.

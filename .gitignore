@@ -9,3 +9,6 @@ coverage/
 .DS_Store
 uploads/
 .claude/
+.hallmark/
+client/test-results/
+client/playwright-report/

@@ -1,10 +1,8 @@
 import { env, isProd } from './config/env.js';
 import { connectDb, disconnectDb } from './config/db.js';
 import { Property } from './models/property.js';
-import { User } from './models/user.js';
-import { hashPassword, passwordProblem } from './utils/password.js';
+import { createAdmin } from './adminSetup.js';
 import { makeSlug } from './modules/properties/service.js';
-import { normalizeEmail } from './utils/phone.js';
 
 // Clearly fake data: every title starts with [SAMPLE] and there are no real photos.
 const SAMPLES = [
@@ -84,28 +82,15 @@ const SAMPLES = [
   },
 ] as const;
 
-/** Idempotent: creates/updates the admin and, outside production, inserts sample listings once. */
-export async function runSeed(rawEmail: string, password: string) {
-  const email = normalizeEmail(rawEmail);
-  if (!email.includes('@')) throw new Error('ADMIN_EMAIL is required');
-  const problem = passwordProblem(password, email);
-  if (problem) throw new Error(`ADMIN_PASSWORD rejected: ${problem}`);
-
-  const existing = await User.findOne({ email });
-  if (existing && existing.role !== 'admin') {
-    throw new Error('A non-admin user with that email already exists; refusing to promote it');
+/** DEVELOPMENT ONLY: demo admin plus sample listings. Refuses to run in production. */
+export async function runSeed(rawEmail: string, password: string, production = isProd) {
+  if (production) {
+    throw new Error('The seed script is development-only. In production use: npm run create-admin');
   }
-  await User.updateOne(
-    { email },
-    {
-      $set: { passwordHash: await hashPassword(password), role: 'admin', emailVerified: true },
-      $setOnInsert: { name: 'Admin', phone: '+910000000000' },
-    },
-    { upsert: true },
-  );
+  const email = await createAdmin(rawEmail, password, false);
   console.info(`admin ready: ${email}`);
 
-  if (!isProd && (await Property.countDocuments({ title: /^\[SAMPLE\]/ })) === 0) {
+  if ((await Property.countDocuments({ title: /^\[SAMPLE\]/ })) === 0) {
     await Property.insertMany(
       SAMPLES.map(({ locality, ...s }, i) => ({
         ...s,
