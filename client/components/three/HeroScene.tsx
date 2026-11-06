@@ -7,8 +7,6 @@ import * as THREE from 'three';
 interface Props {
   /** Renders frames only while true (off-screen / hidden tab pauses the GPU work). */
   active: boolean;
-  /** Mobile / low-power: fewer buildings, no pointer reaction, DPR 1. */
-  light: boolean;
   onReady: () => void;
 }
 
@@ -21,7 +19,6 @@ const FULL: [number, number, number, number, number][] = [
   [3.1, -0.7, 0.9, 1.7, 0.9],
   [-3.3, 0.7, 0.8, 1.4, 0.8],
 ];
-const LIGHT = FULL.slice(0, 4);
 
 const cssVar = (name: string) =>
   typeof document === 'undefined'
@@ -83,17 +80,17 @@ function Tower({
   );
 }
 
-function City({ light }: { light: boolean }) {
+function City() {
   const root = useRef<THREE.Group>(null);
   const ink = useMemo(() => cssVar('--forest') || cssVar('--ink'), []);
   const accent = useMemo(() => cssVar('--gold') || ink, [ink]);
-  const specs = light ? LIGHT : FULL;
+  const specs = FULL;
 
   useFrame(({ clock, pointer }) => {
     const g = root.current;
     if (!g) return;
-    const px = light ? 0 : pointer.x;
-    const py = light ? 0 : pointer.y;
+    const px = pointer.x;
+    const py = pointer.y;
     const targetY = -0.55 + clock.elapsedTime * 0.06 + px * 0.35;
     const targetX = 0.18 - py * 0.12;
     g.rotation.y += (targetY - g.rotation.y) * 0.05;
@@ -112,17 +109,17 @@ function City({ light }: { light: boolean }) {
   );
 }
 
-export default function HeroScene({ active, light, onReady }: Props) {
+export default function HeroScene({ active, onReady }: Props) {
   return (
     <Canvas
       frameloop={active ? 'always' : 'never'}
-      dpr={light ? 1 : [1, 1.75]}
+      dpr={[1, 1.75]}
       camera={{ position: [0, 1.4, 9], fov: 34 }}
-      gl={{ alpha: true, antialias: !light, powerPreference: 'low-power' }}
+      gl={{ alpha: true, antialias: true, powerPreference: 'low-power' }}
       onCreated={onReady}
       aria-hidden
     >
-      <City light={light} />
+      <City />
     </Canvas>
   );
 }

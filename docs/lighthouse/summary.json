@@ -1,0 +1,97 @@
+[
+  {
+    "page": "/",
+    "performance": 93,
+    "accessibility": 100,
+    "bestPractices": 100,
+    "seo": 100,
+    "lcpMs": 3071,
+    "cls": 0,
+    "tbtMs": 98,
+    "failing": [
+      "largest-contentful-paint: 0.76",
+      "max-potential-fid: 0.61",
+      "mainthread-work-breakdown: 0",
+      "largest-contentful-paint-element: 0",
+      "render-blocking-resources: 0.5",
+      "unused-javascript: 0",
+      "legacy-javascript: 0",
+      "forced-reflow-insight: 0",
+      "legacy-javascript-insight: 0",
+      "network-dependency-tree-insight: 0",
+      "render-blocking-insight: 0"
+    ]
+  },
+  {
+    "page": "/listings",
+    "performance": 90,
+    "accessibility": 100,
+    "bestPractices": 100,
+    "seo": 100,
+    "lcpMs": 3507,
+    "cls": 0,
+    "tbtMs": 128,
+    "failing": [
+      "largest-contentful-paint: 0.64",
+      "max-potential-fid: 0.42",
+      "mainthread-work-breakdown: 0",
+      "largest-contentful-paint-element: 0",
+      "render-blocking-resources: 0.5",
+      "unused-javascript: 0",
+      "legacy-javascript: 0",
+      "bf-cache: 0",
+      "lcp-discovery-insight: 0",
+      "legacy-javascript-insight: 0",
+      "network-dependency-tree-insight: 0",
+      "render-blocking-insight: 0"
+    ]
+  },
+  {
+    "page": "/listings/sample-furnished-room-for-rent-d06486",
+    "performance": 88,
+    "accessibility": 100,
+    "bestPractices": 100,
+    "seo": 100,
+    "lcpMs": 3470,
+    "cls": 0,
+    "tbtMs": 204,
+    "failing": [
+      "largest-contentful-paint: 0.65",
+      "total-blocking-time: 0.89",
+      "max-potential-fid: 0.31",
+      "largest-contentful-paint-element: 0",
+      "render-blocking-resources: 0.5",
+      "unused-javascript: 0",
+      "legacy-javascript: 0",
+      "bf-cache: 0",
+      "forced-reflow-insight: 0",
+      "lcp-discovery-insight: 0",
+      "legacy-javascript-insight: 0",
+      "network-dependency-tree-insight: 0",
+      "render-blocking-insight: 0.5"
+    ]
+  },
+  {
+    "page": "/contact",
+    "performance": 91,
+    "accessibility": 100,
+    "bestPractices": 100,
+    "seo": 100,
+    "lcpMs": 3062,
+    "cls": 0,
+    "tbtMs": 165,
+    "failing": [
+      "largest-contentful-paint: 0.76",
+      "max-potential-fid: 0.6",
+      "largest-contentful-paint-element: 0",
+      "render-blocking-resources: 0.5",
+      "unused-javascript: 0",
+      "legacy-javascript: 0",
+      "bf-cache: 0",
+      "forced-reflow-insight: 0",
+      "legacy-javascript-insight: 0",
+      "network-dependency-tree-insight: 0",
+      "render-blocking-insight: 0.5"
+    ]
+  }
+]

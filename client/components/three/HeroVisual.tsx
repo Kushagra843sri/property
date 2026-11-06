@@ -9,21 +9,27 @@ import { cn } from '@/lib/cn';
 // Loaded only on demand; three.js never enters the main bundle.
 const HeroScene = dynamic(() => import('./HeroScene'), { ssr: false });
 
-function canUse3d(): { ok: boolean; light: boolean } {
-  if (!FEATURES.hero3d || typeof window === 'undefined') return { ok: false, light: true };
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches)
-    return { ok: false, light: true };
-  const conn = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection;
-  if (conn?.saveData) return { ok: false, light: true };
+/**
+ * 3D is an enhancement for large, capable screens only. Phones, small tablets, low-memory or
+ * low-core devices, data-saver and reduced-motion users keep the static poster, and never download
+ * the three.js chunk (it cost ~130 KB and ~1.4 s of main-thread time on a throttled phone).
+ */
+function canUse3d(): boolean {
+  if (!FEATURES.hero3d || typeof window === 'undefined') return false;
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return false;
+  if (!window.matchMedia('(min-width: 1024px) and (hover: hover)').matches) return false;
+  const nav = navigator as Navigator & {
+    deviceMemory?: number;
+    connection?: { saveData?: boolean };
+  };
+  if (nav.connection?.saveData) return false;
+  if ((nav.deviceMemory ?? 8) < 4 || (nav.hardwareConcurrency ?? 8) < 6) return false;
   try {
     const c = document.createElement('canvas');
-    if (!(c.getContext('webgl2') || c.getContext('webgl'))) return { ok: false, light: true };
+    return !!(c.getContext('webgl2') || c.getContext('webgl'));
   } catch {
-    return { ok: false, light: true };
+    return false;
   }
-  const small =
-    window.matchMedia('(max-width: 767px)').matches || (navigator.hardwareConcurrency ?? 8) <= 4;
-  return { ok: true, light: small };
 }
 
 /**
@@ -33,17 +39,16 @@ function canUse3d(): { ok: boolean; light: boolean } {
  */
 export function HeroVisual({ poster }: { poster: string }) {
   const box = useRef<HTMLDivElement>(null);
-  const [mode, setMode] = useState<{ ok: boolean; light: boolean }>({ ok: false, light: true });
+  const [enabled, setEnabled] = useState(false);
   const [ready, setReady] = useState(false);
   const [inView, setInView] = useState(true);
   const [tabVisible, setTabVisible] = useState(true);
 
   useEffect(() => {
-    const check = canUse3d();
-    if (!check.ok) return;
+    if (!canUse3d()) return;
     const idle = (window as Window & { requestIdleCallback?: (cb: () => void) => number })
       .requestIdleCallback;
-    const start = () => setMode(check);
+    const start = () => setEnabled(true);
     const handle = idle ? idle(start) : window.setTimeout(start, 400);
     return () => {
       if (!idle) window.clearTimeout(handle);
@@ -52,7 +57,7 @@ export function HeroVisual({ poster }: { poster: string }) {
 
   useEffect(() => {
     const el = box.current;
-    if (!el || !mode.ok) return;
+    if (!el || !enabled) return;
     const io = new IntersectionObserver(([e]) => setInView(!!e?.isIntersecting));
     io.observe(el);
     const onVis = () => setTabVisible(!document.hidden);
@@ -61,7 +66,7 @@ export function HeroVisual({ poster }: { poster: string }) {
       io.disconnect();
       document.removeEventListener('visibilitychange', onVis);
     };
-  }, [mode.ok]);
+  }, [enabled]);
 
   return (
     <div
@@ -77,18 +82,14 @@ export function HeroVisual({ poster }: { poster: string }) {
         sizes="(min-width: 1024px) 720px, 100vw"
         className="object-cover"
       />
-      {mode.ok && (
+      {enabled && (
         <div
           className={cn(
             'absolute inset-0 transition-opacity duration-[800ms] ease-out',
             ready ? 'opacity-100' : 'opacity-0',
           )}
         >
-          <HeroScene
-            active={inView && tabVisible}
-            light={mode.light}
-            onReady={() => setReady(true)}
-          />
+          <HeroScene active={inView && tabVisible} onReady={() => setReady(true)} />
         </div>
       )}
     </div>
