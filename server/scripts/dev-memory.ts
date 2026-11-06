@@ -31,8 +31,8 @@ Object.assign(process.env, {
   DEALER_NOTIFY_EMAIL: 'dealer@example.com',
 });
 
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL ?? 'admin@example.com';
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD ?? 'demo-admin-passphrase-1';
+const { DEMO_ADMIN_EMAIL: ADMIN_EMAIL, DEMO_ADMIN_PASSWORD: ADMIN_PASSWORD } =
+  await import('../src/adminSetup.js');
 
 const { createApp } = await import('../src/app.js');
 const { connectDb } = await import('../src/config/db.js');
