@@ -85,11 +85,21 @@ export async function runSeed(rawEmail: string, password: string) {
 
   if (!isProd && (await Property.countDocuments({ title: /^\[SAMPLE\]/ })) === 0) {
     await Property.insertMany(
-      SAMPLES.map(({ locality, ...s }) => ({
+      SAMPLES.map(({ locality, ...s }, i) => ({
         ...s,
         slug: makeSlug(s.title),
-        description: 'Sample listing for development. Not a real property.',
+        description:
+          'Sample listing for development. Not a real property. Replace with your own listings from the admin panel.',
         address: { city: 'Lucknow', state: 'Uttar Pradesh', locality },
+        geo: { lat: 26.85 + i * 0.01, lng: 80.94 + i * 0.01 },
+        amenities: ['Parking', 'Power backup', 'Lift', '24x7 security'],
+        // Placeholder pictures live in the client app (client/public/placeholders).
+        images: [0, 1, 2].map((k) => ({
+          url: `/placeholders/sample-${((i + k) % 6) + 1}.svg`,
+          publicId: `sample/${i}-${k}`,
+          alt: 'Placeholder image for a sample listing',
+          order: k,
+        })),
       })),
     );
     console.info(`inserted ${SAMPLES.length} sample properties (NODE_ENV=${env.NODE_ENV})`);

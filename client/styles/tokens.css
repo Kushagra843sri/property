@@ -1,0 +1,74 @@
+/* Hallmark · v2.0.0 · theme: Ledger (custom, editorial) · genre: editorial · job: browse + enquire
+   critique: restrained palette, photographs lead, serif prices; motion explains, never decorates
+   waive: none */
+
+/* Design tokens. EVERYTHING visual is defined here once; swap the brand by editing this file. */
+:root {
+  /* Brand palette (PLACEHOLDER: no client brand supplied yet) */
+  --paper: #f5f1ea;
+  --paper-raised: #fbf9f5;
+  --paper-sunken: #ece6da;
+  --ink: #14181b;
+  --ink-muted: #4a5250;
+  --line: #d6cfc0;
+  --line-strong: #8d8777;
+  --forest: #1f3d36;
+  --forest-hover: #16302a;
+  --on-forest: #f5f1ea;
+  --brass: #b08a4a; /* decorative only (rules, marks); never body text */
+  --brass-ink: #6b5020; /* brass as readable text */
+  --focus: #1f3d36;
+  --scrim: rgb(20 24 27 / 0.55);
+
+  /* Semantic */
+  --success: #2a6a3b;
+  --success-bg: #e3efe4;
+  --warn: #7a4d00;
+  --warn-bg: #f6e9cf;
+  --error: #a3301d;
+  --error-bg: #f6e0da;
+
+  /* Type */
+  --font-serif: var(--font-newsreader), 'Iowan Old Style', Georgia, serif;
+  --font-ui: var(--font-instrument), system-ui, sans-serif;
+  --text-xs: 0.8125rem;
+  --text-sm: 0.9375rem;
+  --text-base: 1.0625rem;
+  --text-lg: clamp(1.125rem, 1.05rem + 0.4vw, 1.3125rem);
+  --text-xl: clamp(1.375rem, 1.2rem + 0.9vw, 1.875rem);
+  --text-2xl: clamp(1.75rem, 1.4rem + 1.8vw, 2.75rem);
+  --text-3xl: clamp(2.25rem, 1.6rem + 3.2vw, 4.25rem);
+  --text-hero: clamp(2.75rem, 1.7rem + 5.4vw, 6.25rem);
+  --leading-body: 1.6;
+  --leading-tight: 1.08;
+  --measure: 66ch;
+
+  /* Spacing, radii, shadows */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-24: 6rem;
+  --gutter: clamp(1rem, 0.5rem + 2.4vw, 2.5rem);
+  --container: 80rem;
+  --r-sm: 0.25rem;
+  --r: 0.5rem;
+  --r-lg: 0.875rem;
+  --r-pill: 999px;
+  --sh-raised: 0 1px 2px rgb(20 24 27 / 0.06), 0 8px 24px -12px rgb(20 24 27 / 0.18);
+  --sh-overlay: 0 24px 64px -16px rgb(20 24 27 / 0.35);
+
+  /* Motion */
+  --dur-fast: 150ms;
+  --dur-base: 250ms;
+  --dur-slow: 450ms;
+  --dur-hero: 800ms;
+  --ease-emph: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-both: cubic-bezier(0.65, 0, 0.35, 1);
+  --header-h: 4.25rem;
+  --touch: 2.75rem; /* 44px minimum target */
+}

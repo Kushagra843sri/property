@@ -31,6 +31,15 @@ meRouter.get(
   },
 );
 
+// Ids of every listing the user is interested in (cap 1000), so the UI can mark buttons without N requests.
+meRouter.get('/interest-ids', async (req, res) => {
+  const rows = await Interest.find({ user: req.auth!.userId })
+    .select('property')
+    .limit(1000)
+    .lean();
+  res.json({ data: rows.map((r) => String(r.property)) });
+});
+
 // Withdrawing consent keeps the account (so the user can log back in and re-consent or delete it)
 // but marks it `withdrawn`: it is excluded from lead exports and cannot register new interests.
 meRouter.patch('/', validate({ body: patchBody }), async (req, res) => {
