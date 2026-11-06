@@ -3,8 +3,8 @@
 import { useEffect, useRef, type ReactNode } from 'react';
 
 /**
- * Scroll reveal that is visible by default. The hidden start state only applies when scripting is
- * enabled (CSS `@media (scripting: enabled)` in globals.css), and reduced-motion users get none.
+ * Scroll reveal that is visible by default. Only elements that start below the fold are "armed"
+ * (hidden) by this effect, so no-JS and reduced-motion users always see everything.
  */
 export function Reveal({
   children,
@@ -20,10 +20,14 @@ export function Reveal({
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    if (typeof IntersectionObserver === 'undefined') {
-      el.dataset.in = 'true';
+    // Already on screen (or no IntersectionObserver): leave it visible, no animation.
+    if (
+      typeof IntersectionObserver === 'undefined' ||
+      el.getBoundingClientRect().top < window.innerHeight
+    )
       return;
-    }
+    document.documentElement.classList.add('js'); // scripting is proven on: safe to hide
+    el.dataset.armed = 'true';
     const io = new IntersectionObserver(
       ([entry]) => {
         if (entry?.isIntersecting) {

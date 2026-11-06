@@ -35,7 +35,7 @@ export function InterestButton({
       <span
         role="status"
         className={cn(
-          'inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-success-bg px-5 font-medium text-success',
+          'inline-flex min-h-11 items-center justify-center gap-2 animate-[fade-in_200ms_ease-out] rounded-md bg-success-bg px-5 font-medium text-success',
           variant === 'panel' && 'min-h-12 w-full',
           className,
         )}

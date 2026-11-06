@@ -1,13 +1,14 @@
 /* Hallmark · v2.0.0 · theme: Ledger, retinted green and gold · genre: editorial · job: browse + enquire
    critique: restrained palette, photographs lead, serif prices; motion explains, never decorates
-   waive: none */
+   waive 49b (home and listings): listing titles are data and wrap rather than truncate (every title stays readable)
+   waive 44c, 78 (utility pages): listings and contact are tools, not landing strips */
 
 /* Design tokens. EVERYTHING visual is defined here once; swap the brand by editing this file. */
 :root {
   /* Brand palette: deep green, gold lettering, white panels (PLACEHOLDER until the real logo/brand
      guide arrives; the sign shows green + gold). Change colours here only. */
   --paper: #f5f3ea;
-  --paper-raised: #ffffff; /* white panels */
+  --paper-raised: #fffdf9; /* white panels (tinted a hair toward the paper) */
   --paper-sunken: #e8e6d8;
   --ink: #11201a;
   --ink-muted: #44524b;
@@ -16,7 +17,7 @@
   --forest: #0f4a35; /* primary: buttons, links */
   --forest-hover: #0b3a29;
   --forest-deep: #0a2e21; /* header / footer background */
-  --on-forest: #ffffff;
+  --on-forest: #fffdf8;
   --on-forest-muted: #c7d5cc;
   --line-on-dark: #2e5645;
   --gold: #c9a227; /* decorative only: rules, emblem, big marks */
@@ -43,6 +44,7 @@
   --text-lg: clamp(1.125rem, 1.05rem + 0.4vw, 1.3125rem);
   --text-xl: clamp(1.375rem, 1.2rem + 0.9vw, 1.875rem);
   --text-2xl: clamp(1.75rem, 1.4rem + 1.8vw, 2.75rem);
+  --text-section: clamp(1.875rem, 1.2rem + 2.4vw, 3.25rem);
   --text-3xl: clamp(2.25rem, 1.6rem + 3.2vw, 4.25rem);
   --text-hero: clamp(2.75rem, 1.7rem + 5.4vw, 6.25rem);
   --leading-body: 1.6;
@@ -59,6 +61,7 @@
   --space-12: 3rem;
   --space-16: 4rem;
   --space-24: 6rem;
+  --section-gap: clamp(4rem, 2.5rem + 5vw, 7.5rem);
   --gutter: clamp(1rem, 0.5rem + 2.4vw, 2.5rem);
   --container: 80rem;
   --r-sm: 0.25rem;
