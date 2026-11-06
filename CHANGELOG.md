@@ -6,6 +6,8 @@ All notable user-visible changes. Format: [Keep a Changelog](https://keepachange
 
 ### Added
 
+- Deployment guide, admin guide and handover notes (drafts); `create-admin` command; pluggable rate-limit storage.
+
 - Admin panel: sign in, dashboard, listings manager with photo upload and reordering, leads with status and notes, interests, enquiries, CSV export.
 
 - Public website: home (Buy and Rent entries, PG and room quick links, optional 3D hero), listings with URL-synced filters, property detail with gallery, contact, about, privacy and terms (drafts), sitemap and robots.

@@ -80,16 +80,22 @@ Business name, phone numbers, address and hours are constants in `client/lib/sit
 A Husky pre-commit hook runs Prettier and ESLint on staged files. CI (`.github/workflows/ci.yml`)
 runs lint, typecheck, test, build and `npm audit --audit-level=high` for both apps.
 
-## Seeding
+## Admin account and sample data
 
 ```bash
 cd server
-ADMIN_EMAIL=owner@example.com ADMIN_PASSWORD='a-long-passphrase' npm run seed
+# Any environment (including production): create the admin from env values only.
+ADMIN_EMAIL=owner@yourdomain.com ADMIN_PASSWORD='a long passphrase' npm run create-admin
+# After `npm run build`, on a server without dev tools:  npm run create-admin:prod
+
+# Development only (refuses to run when NODE_ENV=production): demo admin + [SAMPLE] listings
+ADMIN_EMAIL=admin@example.com ADMIN_PASSWORD='demo-admin-passphrase-1' npm run seed
 ```
 
-This creates the admin account and clearly fake sample properties (title prefixed `[SAMPLE]`).
-Admin accounts are never created through public signup.
+`create-admin` never inserts sample data and, in production, rejects demo/example credentials. Admin accounts are never created through public signup.
 
 ## Deployment
+
+Plan (not executed): `docs/deploy.md` (Render API, Vercel website, Atlas, split-domain cookie/CSRF notes, env checklist, backups). Day-to-day use: `docs/admin-guide.md`; handover notes: `docs/handover.md`. Previously:
 
 Not set up yet. Overview and hosting details will live in `docs/handover.md`.

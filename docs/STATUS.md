@@ -8,10 +8,14 @@ Resume point for a fresh session. Read `CLAUDE.md`, then this file, then `docs/M
 - Client facts applied: Shree Shyam Properties brand (green and gold), property types flat/shop/office/pg/room (BHK for flats only), Buy/Rent parity on the home page.
 - Checks at the last change: server 106 tests, client 25 unit tests, Playwright 7 journeys, contrast all pass, audit high/critical = 0.
 
+## Verification and launch prep
+
+- Lighthouse mobile 87 to 91 performance, 100 accessibility/best practices/SEO; axe clean on all pages; sloplint 0 FAIL; production-safety tests; pluggable rate-limit store; Dockerfile; deploy, admin-guide and handover drafts. See the top of `docs/MORNING-REVIEW.md`.
+
 ## Next
 
 - Owner actions listed in `docs/MORNING-REVIEW.md` section 2 (name spelling, phones, logo, credentials, legal review).
-- Phase 5 (polish and launch) is NOT started: performance and accessibility measurement, security checklist run, docs (admin guide, handover), deployment.
+- Phase 5 remaining: run `/review-animations` (user-invoked), real-device performance, SECURITY.md section 11 walkthrough, Sentry/uptime, legal review, deployment (not started), handover walkthrough.
 
 ## Notes
 

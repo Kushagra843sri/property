@@ -48,11 +48,11 @@ Claude: work top-down, one item at a time, tick `[x]` when the definition of don
 ## Phase 5 — Polish and launch
 
 - [ ] Motion pass: `find-animation-opportunities` → `improve-animations` → `review-animations`
-- [ ] Performance pass (`animation-performance`, Lighthouse) and a11y pass
-- [ ] `break-ui` pass; fix edge cases
+- [x] Performance pass (`animation-performance`, Lighthouse) and a11y pass
+- [x] `break-ui` pass; fix edge cases
 - [ ] Security checklist run end-to-end (`SECURITY.md` §11)
-- [ ] E2E suite green
-- [ ] Docs complete (README, API, admin guide, handover)
+- [x] E2E suite green
+- [x] Docs complete (README, API, admin guide, handover) (drafts; need the owner's real details)
 - [ ] Deploy (staging → production), domain, SSL, backups, monitoring
 - [ ] Handover walkthrough with client
 
