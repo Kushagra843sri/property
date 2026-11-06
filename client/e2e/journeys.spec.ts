@@ -45,6 +45,33 @@ test.describe('critical journeys', () => {
     await expect(page.getByRole('link', { name: 'My account' }).first()).toBeVisible();
   });
 
+  test('account: interests, consent withdrawal and deletion', async ({ page }) => {
+    const me = newPerson();
+    await page.goto('/listings?purpose=rent&type=room');
+    await page.getByRole('button', { name: 'I am interested' }).first().click();
+    await signUp(page, me);
+    await expect(page.getByText('Interest sent').first()).toBeVisible();
+
+    await page.getByRole('link', { name: 'My account' }).first().click();
+    await expect(page.getByRole('heading', { name: 'My account' })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Furnished room for rent' })).toBeVisible();
+
+    await page.getByRole('button', { name: 'Stop contacting me' }).click();
+    await expect(page.getByText('Contact is switched off')).toBeVisible();
+    // Withdrawn users cannot register new interest.
+    await page.goto('/listings?purpose=rent&type=pg');
+    await page.getByRole('button', { name: 'I am interested' }).first().click();
+    await expect(page.getByText(/consent to be contacted is switched off/i)).toBeVisible();
+
+    await page.goto('/account');
+    await page.getByRole('button', { name: 'Remove' }).click();
+    await expect(page.getByText('You have not shown interest in any property yet.')).toBeVisible();
+    await page.getByRole('button', { name: 'Delete my account' }).click();
+    await page.getByRole('button', { name: 'Yes, delete everything' }).click();
+    await expect(page).toHaveURL('/');
+    await expect(page.getByRole('button', { name: 'Sign in' }).first()).toBeVisible();
+  });
+
   test('4. contact form submission succeeds', async ({ page }) => {
     const me = newPerson();
     await page.goto('/contact');

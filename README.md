@@ -57,7 +57,14 @@ placeholder URLs. Production refuses to start with these fallbacks.
 | `CLOUDINARY_FOLDER`                                                    | Upload folder                                    | `properties`                         | no                                              |
 | `ADMIN_EMAIL`, `ADMIN_PASSWORD`                                        | Used only by `npm run seed` to create the admin  | _(choose; 12+ chars)_                | for seeding                                     |
 
-The client has no env vars yet.
+### Client (`client/.env.local`, see `client/.env.example`)
+
+| Name                   | Purpose                                                  | Example                        | Required                 |
+| ---------------------- | -------------------------------------------------------- | ------------------------------ | ------------------------ |
+| `NEXT_PUBLIC_API_URL`  | API base URL used by the browser and server components   | `http://localhost:4000/api/v1` | no (this is the default) |
+| `NEXT_PUBLIC_SITE_URL` | Public site URL for canonical links, sitemap and JSON-LD | `https://example.com`          | production               |
+
+Business name, phone numbers, address and hours are constants in `client/lib/site.ts` (marked PLACEHOLDER until confirmed). Colours, fonts and motion values are tokens in `client/styles/tokens.css`. The 3D hero can be switched off with one line in `client/lib/flags.ts`.
 
 ## Scripts
 
