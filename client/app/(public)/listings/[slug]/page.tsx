@@ -108,8 +108,8 @@ export default async function PropertyPage({ params }: { params: Params }) {
         / <span aria-current="page">{p.title}</span>
       </nav>
 
-      <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,22rem)] lg:gap-14">
-        <div className="min-w-0">
+      <div className="grid gap-x-14 gap-y-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,22rem)]">
+        <div className="min-w-0 lg:col-start-1 lg:row-start-1">
           <Gallery images={p.images} title={p.title} />
 
           <header className="mt-8">
@@ -124,7 +124,10 @@ export default async function PropertyPage({ params }: { params: Params }) {
               <MapPin size={18} aria-hidden /> {where}
             </p>
           </header>
+        </div>
 
+        {/* Sections below the header; on phones the contact panel sits between header and these. */}
+        <div className="min-w-0 lg:col-start-1 lg:row-start-2">
           <section aria-labelledby="overview" className="mt-10">
             <h2 id="overview" className="mb-2 text-[length:var(--text-xl)]">
               Overview
@@ -208,7 +211,7 @@ export default async function PropertyPage({ params }: { params: Params }) {
 
         <aside
           aria-label="Contact about this property"
-          className="lg:sticky lg:top-[calc(var(--header-h)+1.5rem)] lg:self-start"
+          className="lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:sticky lg:top-[calc(var(--header-h)+1.5rem)] lg:self-start"
         >
           <div className="rounded-lg border border-line bg-raised p-6 shadow-raised">
             <p className="font-display text-[2.25rem] leading-none">
