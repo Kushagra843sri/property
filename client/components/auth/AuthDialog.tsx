@@ -27,21 +27,24 @@ interface Props {
 }
 
 export function AuthDialog({ open, initialMode, onClose, onAuthenticated }: Props) {
+  return (
+    <Dialog open={open} onClose={onClose} title="Sign in or create an account">
+      {/* Mounted only while open, so every opening starts from fresh state. */}
+      <AuthFlow initialMode={initialMode} onAuthenticated={onAuthenticated} />
+    </Dialog>
+  );
+}
+
+function AuthFlow({
+  initialMode,
+  onAuthenticated,
+}: Pick<Props, 'initialMode' | 'onAuthenticated'>) {
   const [mode, setMode] = useState<Mode>(initialMode);
   const [identifier, setIdentifier] = useState('');
   const [errors, setErrors] = useState<FieldErrors>({});
   const [formError, setFormError] = useState('');
   const [busy, setBusy] = useState(false);
   const [cooldown, setCooldown] = useState(0);
-
-  useEffect(() => {
-    if (open) {
-      setMode(initialMode);
-      setErrors({});
-      setFormError('');
-      setCooldown(0);
-    }
-  }, [open, initialMode]);
 
   useEffect(() => {
     if (cooldown <= 0) return;
@@ -156,7 +159,7 @@ export function AuthDialog({ open, initialMode, onClose, onAuthenticated }: Prop
         : 'Enter your code';
 
   return (
-    <Dialog open={open} onClose={onClose} title={title}>
+    <>
       <h2 className="pr-10 text-2xl">{title}</h2>
 
       {mode === 'signup' && (
@@ -319,6 +322,6 @@ export function AuthDialog({ open, initialMode, onClose, onAuthenticated }: Prop
           </p>
         </>
       )}
-    </Dialog>
+    </>
   );
 }

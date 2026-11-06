@@ -28,8 +28,13 @@ export const viewport: Viewport = { themeColor: '#f5f1ea', width: 'device-width'
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en-IN" className={`${newsreader.variable} ${instrument.variable}`}>
-      <body className="min-h-dvh">
+    <html
+      lang="en-IN"
+      data-scroll-behavior="smooth"
+      className={`${newsreader.variable} ${instrument.variable}`}
+    >
+      {/* suppressHydrationWarning: browser extensions inject attributes (e.g. cz-shortcut-listen) onto body */}
+      <body className="min-h-dvh" suppressHydrationWarning>
         <a href="#main" className="skip-link">
           Skip to content
         </a>

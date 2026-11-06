@@ -13,7 +13,11 @@ import { Wordmark } from './Wordmark';
 export function Header() {
   const pathname = usePathname();
   const { user, ready, openAuth, logout } = useAuth();
-  const [open, setOpen] = useState(false);
+  // The menu is "open for this path": navigating changes the path, which closes it without an effect.
+  const [openAt, setOpenAt] = useState<string | null>(null);
+  const open = openAt === pathname;
+  const setOpen = (v: boolean | ((o: boolean) => boolean)) =>
+    setOpenAt((cur) => ((typeof v === 'function' ? v(cur === pathname) : v) ? pathname : null));
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -22,9 +26,6 @@ export function Header() {
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
-
-  // Close the menu on navigation.
-  useEffect(() => setOpen(false), [pathname]);
 
   const link = (href: string) =>
     cn(

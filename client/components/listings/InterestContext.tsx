@@ -21,6 +21,7 @@ interface InterestValue {
   remove: (propertyId: string) => Promise<boolean>;
 }
 
+const EMPTY: Set<string> = new Set();
 const Ctx = createContext<InterestValue | null>(null);
 
 export function useInterests(): InterestValue {
@@ -31,22 +32,25 @@ export function useInterests(): InterestValue {
 
 export function InterestProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
-  const [ids, setIds] = useState<Set<string>>(new Set());
+  // `owner` ties the ids to the signed-in user, so logging out/in never shows someone else's state.
+  const [state, setState] = useState<{ owner: string | null; ids: Set<string> }>({
+    owner: null,
+    ids: EMPTY,
+  });
+  const ids = state.owner !== null && state.owner === user?.id ? state.ids : EMPTY;
+  const userId = user?.id ?? null;
   const [busy, setBusy] = useState<Set<string>>(new Set());
 
   useEffect(() => {
-    if (!user) {
-      setIds(new Set());
-      return;
-    }
+    if (!userId) return;
     let cancelled = false;
     api<string[]>('/me/interest-ids')
-      .then((r) => !cancelled && setIds(new Set(r.data)))
+      .then((r) => !cancelled && setState({ owner: userId, ids: new Set(r.data) }))
       .catch(() => undefined);
     return () => {
       cancelled = true;
     };
-  }, [user]);
+  }, [userId]);
 
   const mark = useCallback((id: string, on: boolean) => {
     setBusy((s) => {
@@ -63,11 +67,11 @@ export function InterestProvider({ children }: { children: ReactNode }) {
       mark(id, true);
       try {
         await api(`/properties/${id}/interest`, { method: interested ? 'POST' : 'DELETE' });
-        setIds((s) => {
-          const n = new Set(s);
+        setState((s) => {
+          const n = new Set(s.owner === userId ? s.ids : EMPTY);
           if (interested) n.add(id);
           else n.delete(id);
-          return n;
+          return { owner: userId, ids: n };
         });
         if (interested) toast.success('Interest sent. We will be in touch soon.');
         return true;
@@ -88,7 +92,7 @@ export function InterestProvider({ children }: { children: ReactNode }) {
         mark(id, false);
       }
     },
-    [busy, mark],
+    [busy, mark, userId],
   );
 
   const value = useMemo<InterestValue>(

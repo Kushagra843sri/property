@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter, usePathname } from 'next/navigation';
-import { useEffect, useState, useTransition, type FormEvent } from 'react';
+import { useState, useTransition, type FormEvent } from 'react';
 import { Search, SlidersHorizontal } from 'lucide-react';
 import {
   BUDGETS,
@@ -52,7 +52,12 @@ export function FilterBar({ filters }: { filters: Filters }) {
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState(filters.q ?? '');
 
-  useEffect(() => setQ(filters.q ?? ''), [filters.q]);
+  // Keep the box in step with the URL (back/forward, clear) without an effect.
+  const [seenQ, setSeenQ] = useState(filters.q);
+  if (seenQ !== filters.q) {
+    setSeenQ(filters.q);
+    setQ(filters.q ?? '');
+  }
 
   const apply = (patch: Partial<Filters>) => {
     const next: Partial<Filters> = { ...filters, ...patch, page: 1 };
