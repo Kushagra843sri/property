@@ -112,7 +112,7 @@ export async function makeProperty(overrides: Record<string, unknown> = {}) {
   const doc = await Property.create({
     title,
     slug: makeSlug(title),
-    type: 'apartment',
+    type: 'flat',
     purpose: 'buy',
     price: 5_000_000 + pseq,
     bhk: 2,

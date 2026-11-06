@@ -61,7 +61,8 @@ adminNotes[], createdAt, updatedAt
 
 ```
 title, slug (unique), description,
-type: 'apartment' | 'villa' | 'plot' | 'commercial' | ...,
+type: 'flat' | 'shop' | 'office' | 'pg' | 'room' | 'villa' | 'house' | 'plot' | 'commercial' | 'other',
+         (bhk is required for 'flat' and rejected for every other type)
 purpose: 'buy' | 'rent',
 price, priceUnit, bhk, bathrooms, carpetArea, builtUpArea, areaUnit,
 furnishing, floor, totalFloors, facing, ageOfProperty, possession,

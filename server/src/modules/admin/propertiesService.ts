@@ -8,7 +8,7 @@ import { logger } from '../../utils/logger.js';
 import { pageMeta } from '../../utils/pagination.js';
 import { sniffImage } from '../../utils/imageSniff.js';
 import { makeSlug } from '../properties/service.js';
-import type { CreatePropertyBody, UpdatePropertyBody } from './schema.js';
+import { type CreatePropertyBody, type UpdatePropertyBody } from './schema.js';
 
 const escapeRegex = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
@@ -57,9 +57,26 @@ export async function createProperty(body: CreatePropertyBody) {
 }
 
 export async function updateProperty(id: string, body: UpdatePropertyBody) {
+  const current = await Property.findById(id).select('type bhk').lean();
+  if (!current) throw AppError.notFound('Property not found');
+  // Validate the resulting state, not just the patch: type and bhk constrain each other.
+  const type = body.type ?? current.type;
+  const bhk = 'bhk' in body ? body.bhk : (current.bhk ?? undefined);
+  const problem =
+    type === 'flat'
+      ? bhk === undefined
+        ? 'BHK is required for a flat'
+        : null
+      : 'bhk' in body && body.bhk !== undefined
+        ? 'BHK applies to flats only'
+        : null;
+  if (problem)
+    throw AppError.badRequest('Validation failed', [{ path: 'body.bhk', message: problem }]);
+  // Changing a flat into another type drops its now-meaningless BHK.
+  const dropBhk = type !== 'flat' && current.bhk != null;
   const p = await Property.findByIdAndUpdate(
     id,
-    { $set: body },
+    { $set: body, ...(dropBhk ? { $unset: { bhk: '' } } : {}) },
     { returnDocument: 'after', runValidators: true },
   ).lean();
   if (!p) throw AppError.notFound('Property not found');

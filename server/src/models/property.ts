@@ -1,13 +1,16 @@
 import { Schema, model, type InferSchemaType } from 'mongoose';
 
+// flat = 1/2/3 BHK flat; pg = paying-guest room; room = furnished room. BHK applies to flats only.
 export const PROPERTY_TYPES = [
-  'apartment',
+  'flat',
+  'shop',
+  'office',
+  'pg',
+  'room',
   'villa',
   'house',
   'plot',
   'commercial',
-  'office',
-  'shop',
   'other',
 ] as const;
 export const PURPOSES = ['buy', 'rent'] as const;
