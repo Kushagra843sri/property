@@ -4,14 +4,14 @@ Resume point for a fresh session. Read `CLAUDE.md`, then this file, then `docs/M
 
 ## Done
 
-- Phase 0 and Phase 1 (backend): merged to `main`.
-- Phase 2 (public site) and Phase 3 (accounts and lead flow): built on branch `feat/phase-2-public-site`; see MORNING-REVIEW for check results and merge state.
-- Client facts applied: Shree Shyam Properties brand (green and gold), property types flat/shop/office/pg/room, Buy/Rent parity on the home page.
+- Phases 0 to 4 are built and merged to `main`: setup, backend, public site, accounts and lead flow, admin panel UI.
+- Client facts applied: Shree Shyam Properties brand (green and gold), property types flat/shop/office/pg/room (BHK for flats only), Buy/Rent parity on the home page.
+- Checks at the last change: server 106 tests, client 25 unit tests, Playwright 7 journeys, contrast all pass, audit high/critical = 0.
 
 ## Next
 
-- Phase 4 admin panel UI (login, dashboard, listings manager, leads, enquiries). Backend API already exists.
-- Phase 5 polish and launch tasks are NOT started (no deployment).
+- Owner actions listed in `docs/MORNING-REVIEW.md` section 2 (name spelling, phones, logo, credentials, legal review).
+- Phase 5 (polish and launch) is NOT started: performance and accessibility measurement, security checklist run, docs (admin guide, handover), deployment.
 
 ## Notes
 
