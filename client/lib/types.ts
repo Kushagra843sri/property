@@ -1,0 +1,53 @@
+export interface Meta {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
+
+export interface PropertyImage {
+  url: string;
+  alt?: string | null;
+  order?: number | null;
+}
+
+export interface Property {
+  id: string;
+  title: string;
+  slug: string;
+  description: string;
+  type: string;
+  purpose: 'buy' | 'rent';
+  price: number;
+  priceUnit: 'total' | 'per-month';
+  bhk?: number;
+  bathrooms?: number;
+  carpetArea?: number;
+  builtUpArea?: number;
+  areaUnit?: 'sqft' | 'sqyd' | 'sqm' | 'acre';
+  furnishing?: string;
+  floor?: number;
+  totalFloors?: number;
+  facing?: string;
+  ageOfProperty?: number;
+  possession?: string;
+  address: { line?: string; locality?: string; city: string; state?: string; pincode?: string };
+  geo?: { lat?: number; lng?: number };
+  amenities: string[];
+  images: PropertyImage[];
+  status: 'available' | 'sold' | 'rented' | 'hidden';
+  featured: boolean;
+  createdAt?: string;
+}
+
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  role: 'user' | 'admin';
+  emailVerified: boolean;
+  phoneVerified: boolean;
+  status: 'active' | 'withdrawn';
+  consentGiven: boolean;
+}

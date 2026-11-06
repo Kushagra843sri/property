@@ -121,6 +121,18 @@ describe('me', () => {
     expect((await request(app).get('/api/v1/me/interests')).status).toBe(401);
   });
 
+  it('returns the ids of listings the caller is interested in', async () => {
+    const a = await signUpAndLogin();
+    const b = await signUpAndLogin();
+    const p1 = await makeProperty();
+    const p2 = await makeProperty();
+    await a.session.post(url(p1._id));
+    await b.session.post(url(p2._id));
+    const res = await a.session.get('/api/v1/me/interest-ids');
+    expect(res.body.data).toEqual([String(p1._id)]);
+    expect((await request(app).get('/api/v1/me/interest-ids')).status).toBe(401);
+  });
+
   it('updates the name, withdraws and restores consent', async () => {
     const { session, id } = await signUpAndLogin();
     const r1 = await session.patch('/api/v1/me', { name: 'New Name' });

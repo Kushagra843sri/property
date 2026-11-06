@@ -14,7 +14,7 @@ useTestDb();
 const AD = '/api/v1/admin';
 const newProp = {
   title: 'Sunrise Heights 3BHK',
-  type: 'apartment',
+  type: 'flat',
   purpose: 'buy',
   price: 7500000,
   bhk: 3,
@@ -92,12 +92,38 @@ describe('admin properties', () => {
     expect(String((await AuditLog.findOne())?.admin)).toBe(adminId);
   });
 
+  it('requires BHK for flats and rejects it for every other type', async () => {
+    const { session } = await loginAdmin();
+    const { bhk: _bhk, ...noBhk } = newProp;
+    void _bhk;
+    expect((await session.post(`${AD}/properties`, noBhk)).status).toBe(400);
+    for (const type of ['shop', 'office', 'pg', 'room']) {
+      expect((await session.post(`${AD}/properties`, { ...newProp, type })).status, type).toBe(400);
+      const ok = await session.post(`${AD}/properties`, { ...noBhk, type, title: `A ${type}` });
+      expect(ok.status, type).toBe(201);
+      expect(ok.body.data.bhk).toBeUndefined();
+    }
+    // Updates are checked against the resulting state.
+    const flat = await session.post(`${AD}/properties`, newProp);
+    const id = flat.body.data.id as string;
+    expect((await session.patch(`${AD}/properties/${id}`, { bhk: 2 })).body.data.bhk).toBe(2);
+    const toShop = await session.patch(`${AD}/properties/${id}`, { type: 'shop' });
+    expect(toShop.status).toBe(200);
+    expect(toShop.body.data.bhk).toBeUndefined(); // dropped with the type change
+    expect((await session.patch(`${AD}/properties/${id}`, { bhk: 3 })).status).toBe(400);
+    expect((await session.patch(`${AD}/properties/${id}`, { type: 'flat' })).status).toBe(400);
+    expect((await session.patch(`${AD}/properties/${id}`, { type: 'flat', bhk: 1 })).status).toBe(
+      200,
+    );
+  });
+
   it('validates input strictly', async () => {
     const { session } = await loginAdmin();
     const bad = [
       {},
       { ...newProp, price: -1 },
       { ...newProp, type: 'castle' },
+      { ...newProp, type: 'apartment' },
       { ...newProp, slug: 'hijack' },
       { ...newProp, viewCount: 99999 },
       { ...newProp, address: {} },

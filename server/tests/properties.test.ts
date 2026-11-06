@@ -40,8 +40,8 @@ describe('public properties', () => {
     });
     await makeProperty({
       title: 'C',
-      bhk: 3,
-      type: 'villa',
+      bhk: undefined,
+      type: 'pg',
       address: { city: 'Delhi', locality: 'Dwarka' },
     });
     const titles = async (qs: string) =>
@@ -51,7 +51,8 @@ describe('public properties', () => {
     expect(await titles('city=lucknow')).toEqual(['A', 'B']);
     expect(await titles('locality=dwarka')).toEqual(['C']);
     expect(await titles('purpose=rent')).toEqual(['B']);
-    expect(await titles('type=villa')).toEqual(['C']);
+    expect(await titles('type=pg')).toEqual(['C']);
+    expect(await titles('type=flat&city=Lucknow')).toEqual(['A', 'B']);
     expect(await titles('bhk=3&city=Lucknow')).toEqual(['B']);
     expect(await titles('furnishing=furnished')).toEqual(['B']);
     expect(await titles('minPrice=5000000&maxPrice=9500000&city=Lucknow')).toEqual(['B']);
@@ -94,6 +95,7 @@ describe('public properties', () => {
       'bhk=abc',
       'sort=random',
       'type=castle',
+      'type=apartment',
       'foo=bar',
       'minPrice=10&maxPrice=5',
       'minPrice=-1',

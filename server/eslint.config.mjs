@@ -12,5 +12,5 @@ export default tseslint.config(
       'no-console': 'error',
     },
   },
-  { files: ['**/src/seed.ts'], rules: { 'no-console': 'off' } }, // CLI script
+  { files: ['**/src/seed.ts', '**/scripts/**'], rules: { 'no-console': 'off' } }, // CLI script
 );

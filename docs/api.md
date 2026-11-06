@@ -19,7 +19,7 @@ Common errors: `400 bad_request` (validation; `details[]` lists fields) · `401 
 
 ### GET /properties
 
-Query: `city, locality, purpose(buy|rent), type, bhk, minPrice, maxPrice, furnishing, status(available|sold|rented; default available), q (text search), sort(newest|price_asc|price_desc|featured), page, limit`. Unknown params → 400. Hidden listings are never returned.
+Query: `city, locality, purpose(buy|rent), type(flat|shop|office|pg|room|villa|house|plot|commercial|other), bhk (flats only), minPrice, maxPrice, furnishing, status(available|sold|rented; default available), q (text search), sort(newest|price_asc|price_desc|featured), page, limit`. Unknown params → 400. Hidden listings are never returned.
 `200 { data: Property[], meta }`
 
 ### GET /properties/:slug
@@ -88,20 +88,20 @@ Permanently deletes the account, its interests and sessions. `200 { data: { dele
 
 ## Admin (auth: admin; all state changes are audit-logged)
 
-| Method & path                                   | Notes                                                                                                                                            |
-| ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `GET /admin/properties`                         | `status, q, page, limit`; includes hidden listings and `viewCount`                                                                               |
-| `POST /admin/properties`                        | Required: `title, type, purpose, price, address.city`. Slug is generated. Unknown fields rejected. `201`                                         |
-| `GET /admin/properties/:id`                     | Single listing                                                                                                                                   |
-| `PATCH /admin/properties/:id`                   | Partial update (status `sold/rented/hidden`, `featured`, …). Nested `address`/`geo` are replaced wholesale                                       |
-| `DELETE /admin/properties/:id`                  | Deletes the listing, its interests, and its images from the image store                                                                          |
-| `POST /admin/properties/:id/images`             | `multipart/form-data`, field `images` (JPG/PNG/WebP, ≤5 MB each, ≤20 per listing). Magic bytes checked, re-encoded to WebP, EXIF stripped. `201` |
-| `PATCH /admin/properties/:id/images`            | `{ images: [{ publicId, order, alt? }] }` reorder / alt text                                                                                     |
-| `DELETE /admin/properties/:id/images?publicId=` | Remove one image                                                                                                                                 |
-| `GET /admin/users`                              | Leads (role `user`): `leadStatus, status, q, page, limit`; includes `interestCount`                                                              |
-| `PATCH /admin/users/:id`                        | `{ leadStatus?(new/contacted/interested/closed), note? }` (note is appended)                                                                     |
-| `GET /admin/interests`                          | `property, user, from, to, page, limit`; includes user + listing summary                                                                         |
-| `GET /admin/enquiries`                          | `status, page, limit`                                                                                                                            |
-| `PATCH /admin/enquiries/:id`                    | `{ status: new/contacted/closed }`                                                                                                               |
-| `GET /admin/export/leads.csv`                   | Active, consenting users only; formula-injection safe; audit-logged                                                                              |
-| `GET /admin/stats`                              | `users, newLeads, interests, newEnquiries, properties{status:count}, recentLeads[], topProperties[]`                                             |
+| Method & path                                   | Notes                                                                                                                                                                                                                          |
+| ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `GET /admin/properties`                         | `status, q, page, limit`; includes hidden listings and `viewCount`                                                                                                                                                             |
+| `POST /admin/properties`                        | Required: `title, type, purpose, price, address.city`, plus `bhk` when `type` is `flat` (BHK is rejected for any other type; changing a flat to another type drops its BHK). Slug is generated. Unknown fields rejected. `201` |
+| `GET /admin/properties/:id`                     | Single listing                                                                                                                                                                                                                 |
+| `PATCH /admin/properties/:id`                   | Partial update (status `sold/rented/hidden`, `featured`, …). Nested `address`/`geo` are replaced wholesale                                                                                                                     |
+| `DELETE /admin/properties/:id`                  | Deletes the listing, its interests, and its images from the image store                                                                                                                                                        |
+| `POST /admin/properties/:id/images`             | `multipart/form-data`, field `images` (JPG/PNG/WebP, ≤5 MB each, ≤20 per listing). Magic bytes checked, re-encoded to WebP, EXIF stripped. `201`                                                                               |
+| `PATCH /admin/properties/:id/images`            | `{ images: [{ publicId, order, alt? }] }` reorder / alt text                                                                                                                                                                   |
+| `DELETE /admin/properties/:id/images?publicId=` | Remove one image                                                                                                                                                                                                               |
+| `GET /admin/users`                              | Leads (role `user`): `leadStatus, status, q, page, limit`; includes `interestCount`                                                                                                                                            |
+| `PATCH /admin/users/:id`                        | `{ leadStatus?(new/contacted/interested/closed), note? }` (note is appended)                                                                                                                                                   |
+| `GET /admin/interests`                          | `property, user, from, to, page, limit`; includes user + listing summary                                                                                                                                                       |
+| `GET /admin/enquiries`                          | `status, page, limit`                                                                                                                                                                                                          |
+| `PATCH /admin/enquiries/:id`                    | `{ status: new/contacted/closed }`                                                                                                                                                                                             |
+| `GET /admin/export/leads.csv`                   | Active, consenting users only; formula-injection safe; audit-logged                                                                                                                                                            |
+| `GET /admin/stats`                              | `users, newLeads, interests, newEnquiries, properties{status:count}, recentLeads[], topProperties[]`                                                                                                                           |

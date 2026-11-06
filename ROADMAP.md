@@ -7,9 +7,9 @@ Claude: work top-down, one item at a time, tick `[x]` when the definition of don
 - [x] Repo, monorepo folders, TypeScript, ESLint, Prettier, Husky pre-commit
 - [x] Env validation, `.env.example`, config modules
 - [x] MongoDB connection, base Express app with helmet, CORS, rate limit, error handler, logger
-- [ ] Next.js app with design tokens, fonts, layout shell
+- [x] Next.js app with design tokens, fonts, layout shell
 - [x] CI: lint, typecheck, test, audit
-- [ ] Design direction agreed (palette, type, motion tokens) — run `ui-ux-pro-max`, `Hallmark`, `emil-design-eng`; get owner sign-off on wireframes/mood before building pages
+- [x] Design direction agreed (delegated to the build agent: Ledger, retinted green and gold; see docs/design-directions.md and docs/MORNING-REVIEW.md) (palette, type, motion tokens) — run `ui-ux-pro-max`, `Hallmark`, `emil-design-eng`; get owner sign-off on wireframes/mood before building pages
 
 ## Phase 1 — Core backend
 
@@ -23,19 +23,19 @@ Claude: work top-down, one item at a time, tick `[x]` when the definition of don
 
 ## Phase 2 — Public site
 
-- [ ] Layout: header, footer with contact block, sticky mobile call/WhatsApp
-- [ ] Home page with hero (3D + poster fallback), featured listings, trust section
-- [ ] Listings page: filter bar, cards, skeletons, pagination, URL-synced filters
-- [ ] Property detail: gallery, specs, amenities, map, sticky "Interested" panel
-- [ ] Contact page + form
-- [ ] About, Privacy, Terms pages
-- [ ] SEO: metadata, sitemap, robots, JSON-LD
+- [x] Layout: header, footer with contact block, sticky mobile call/WhatsApp
+- [x] Home page with hero (3D + poster fallback), featured listings, trust section
+- [x] Listings page: filter bar, cards, skeletons, pagination, URL-synced filters
+- [x] Property detail: gallery, specs, amenities, map, sticky "Interested" panel
+- [x] Contact page + form
+- [x] About, Privacy, Terms pages
+- [x] SEO: metadata, sitemap, robots, JSON-LD
 
 ## Phase 3 — Accounts and lead flow
 
-- [ ] Signup/login/OTP UI with consent checkbox
-- [ ] "Interested" button flow incl. logged-out resume
-- [ ] Account page: my interests, edit profile, withdraw consent/delete account
+- [x] Signup/login/OTP UI with consent checkbox
+- [x] "Interested" button flow incl. logged-out resume
+- [x] Account page: my interests, edit profile, withdraw consent/delete account
 
 ## Phase 4 — Admin panel
 
@@ -66,8 +66,11 @@ Claude: work top-down, one item at a time, tick `[x]` when the definition of don
 
 ## Content needed from client
 
-- [ ] Logo, brand colors (if any), dealer photo and bio
-- [ ] Contact details: phone, WhatsApp, email, office address, hours
+- [ ] Logo file (gold winged emblem on a dark tile), brand guide if any, dealer photo and bio
+- [ ] Confirm the business name spelling: "Shree Shyam Properties" (client) vs "Shri Shyam" (shop sign); it is one constant in `client/lib/site.ts`
+- [ ] Confirm both phone numbers (9238306976, 8368966790 are UNVERIFIED, digits partly hidden on the sign) and which one is on WhatsApp
+- [ ] Contact details: email, office address, map location, opening hours (phone numbers: see above)
+- [ ] Business facts for the About page: story, years of experience, areas served
 - [ ] Property data and photos
 - [ ] Privacy policy / terms review
 - [ ] Domain and hosting decisions

@@ -50,13 +50,25 @@ const propertyFields = {
 
 const required = ['title', 'type', 'purpose', 'price', 'address'] as const;
 
+/** BHK is required for flats and meaningless for every other type. Returns an error message or null. */
+export function bhkProblem(type: string | undefined, bhk: number | undefined): string | null {
+  if (type === 'flat' && bhk === undefined) return 'BHK is required for a flat';
+  if (type !== undefined && type !== 'flat' && bhk !== undefined)
+    return 'BHK applies to flats only';
+  return null;
+}
+
 export const createPropertyBody = z
   .object(propertyFields)
   .partial()
   .required(
     Object.fromEntries(required.map((k) => [k, true])) as Record<(typeof required)[number], true>,
   )
-  .strict();
+  .strict()
+  .superRefine((b, ctx) => {
+    const problem = bhkProblem(b.type, b.bhk);
+    if (problem) ctx.addIssue({ code: 'custom', path: ['bhk'], message: problem });
+  });
 
 export const updatePropertyBody = z
   .object(propertyFields)

@@ -1,0 +1,80 @@
+/* Hallmark · v2.0.0 · theme: Ledger, retinted green and gold · genre: editorial · job: browse + enquire
+   critique: restrained palette, photographs lead, serif prices; motion explains, never decorates
+   waive: none */
+
+/* Design tokens. EVERYTHING visual is defined here once; swap the brand by editing this file. */
+:root {
+  /* Brand palette: deep green, gold lettering, white panels (PLACEHOLDER until the real logo/brand
+     guide arrives; the sign shows green + gold). Change colours here only. */
+  --paper: #f5f3ea;
+  --paper-raised: #ffffff; /* white panels */
+  --paper-sunken: #e8e6d8;
+  --ink: #11201a;
+  --ink-muted: #44524b;
+  --line: #d2d5c6;
+  --line-strong: #7b867d;
+  --forest: #0f4a35; /* primary: buttons, links */
+  --forest-hover: #0b3a29;
+  --forest-deep: #0a2e21; /* header / footer background */
+  --on-forest: #ffffff;
+  --on-forest-muted: #c7d5cc;
+  --line-on-dark: #2e5645;
+  --gold: #c9a227; /* decorative only: rules, emblem, big marks */
+  --gold-bright: #e3c45e; /* gold lettering on the dark green */
+  --gold-ink: #6b5200; /* gold as readable text on light surfaces */
+  --focus: #0f4a35;
+  --focus-on-dark: #e3c45e;
+  --scrim: rgb(10 46 33 / 0.6);
+
+  /* Semantic */
+  --success: #2a6a3b;
+  --success-bg: #e3efe4;
+  --warn: #7a4d00;
+  --warn-bg: #f6e9cf;
+  --error: #a3301d;
+  --error-bg: #f6e0da;
+
+  /* Type */
+  --font-serif: var(--font-newsreader), 'Iowan Old Style', Georgia, serif;
+  --font-ui: var(--font-instrument), system-ui, sans-serif;
+  --text-xs: 0.8125rem;
+  --text-sm: 0.9375rem;
+  --text-base: 1.0625rem;
+  --text-lg: clamp(1.125rem, 1.05rem + 0.4vw, 1.3125rem);
+  --text-xl: clamp(1.375rem, 1.2rem + 0.9vw, 1.875rem);
+  --text-2xl: clamp(1.75rem, 1.4rem + 1.8vw, 2.75rem);
+  --text-3xl: clamp(2.25rem, 1.6rem + 3.2vw, 4.25rem);
+  --text-hero: clamp(2.75rem, 1.7rem + 5.4vw, 6.25rem);
+  --leading-body: 1.6;
+  --leading-tight: 1.08;
+  --measure: 66ch;
+
+  /* Spacing, radii, shadows */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-24: 6rem;
+  --gutter: clamp(1rem, 0.5rem + 2.4vw, 2.5rem);
+  --container: 80rem;
+  --r-sm: 0.25rem;
+  --r: 0.5rem;
+  --r-lg: 0.875rem;
+  --r-pill: 999px;
+  --sh-raised: 0 1px 2px rgb(20 24 27 / 0.06), 0 8px 24px -12px rgb(20 24 27 / 0.18);
+  --sh-overlay: 0 24px 64px -16px rgb(20 24 27 / 0.35);
+
+  /* Motion */
+  --dur-fast: 150ms;
+  --dur-base: 250ms;
+  --dur-slow: 450ms;
+  --dur-hero: 800ms;
+  --ease-emph: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-both: cubic-bezier(0.65, 0, 0.35, 1);
+  --header-h: 4.25rem;
+  --touch: 2.75rem; /* 44px minimum target */
+}
