@@ -39,11 +39,11 @@ Claude: work top-down, one item at a time, tick `[x]` when the definition of don
 
 ## Phase 4 — Admin panel
 
-- [ ] Admin login, protected layout
-- [ ] Dashboard (counts, recent leads, top-interest listings)
-- [ ] Listings manager (create/edit/hide/feature/sold, multi-image upload with reorder)
-- [ ] Leads manager (filters, status, notes, per-listing interest view, CSV export)
-- [ ] Enquiries inbox
+- [x] Admin login, protected layout
+- [x] Dashboard (counts, recent leads, top-interest listings)
+- [x] Listings manager (create/edit/hide/feature/sold, multi-image upload with reorder)
+- [x] Leads manager (filters, status, notes, per-listing interest view, CSV export)
+- [x] Enquiries inbox
 
 ## Phase 5 — Polish and launch
 

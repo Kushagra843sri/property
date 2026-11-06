@@ -111,3 +111,72 @@ test.describe('layout', () => {
     await expect(page.getByRole('link', { name: 'Skip to content' })).toBeFocused();
   });
 });
+
+// 1x1 PNG
+const PNG = Buffer.from(
+  'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==',
+  'base64',
+);
+
+test('3. admin creates a listing with a photo, sees the new lead and interest, updates status and exports CSV', async ({
+  page,
+  browser,
+}) => {
+  const title = `E2E Shop ${Date.now()}`;
+
+  // Admin signs in and creates a listing.
+  await page.goto('/admin');
+  await page.getByLabel('Email', { exact: true }).fill('admin@example.com');
+  await page.getByLabel('Password').fill('demo-admin-passphrase-1');
+  await page.getByRole('button', { name: 'Sign in' }).click();
+  await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible();
+
+  await page.goto('/admin/listings/new');
+  await page.getByLabel('Title').fill(title);
+  await page.getByLabel('Property type').selectOption('shop');
+  await expect(page.getByLabel('BHK')).toHaveCount(0); // BHK is for flats only
+  await page.getByLabel('Property type').selectOption('flat');
+  await page.getByRole('button', { name: 'Create listing' }).click();
+  await expect(page.getByText('Choose the BHK')).toBeVisible();
+  await page.getByLabel('Property type').selectOption('shop');
+  await page.getByLabel('Price in rupees').fill('30000');
+  await page.getByLabel('Price is').selectOption('per-month');
+  await page.getByLabel('City').fill('Sample City');
+  await page.getByRole('button', { name: 'Create listing' }).click();
+  await expect(page).toHaveURL(/\/admin\/listings\/[0-9a-f]{24}$/);
+
+  await page
+    .locator('#photo-input')
+    .setInputFiles({ name: 'shop.png', mimeType: 'image/png', buffer: PNG });
+  await expect(page.getByRole('heading', { name: 'Photos (1)' })).toBeVisible();
+
+  // A visitor registers interest in it.
+  const visitorCtx = await browser.newContext();
+  const visitor = await visitorCtx.newPage();
+  const me = newPerson();
+  await visitor.goto(`/listings?q=${encodeURIComponent(title.split(' ').slice(0, 3).join(' '))}`);
+  const card = visitor.locator('article', { hasText: title });
+  await card.getByRole('button', { name: 'I am interested' }).click();
+  await signUp(visitor, me);
+  await expect(visitor.getByText('Interest sent').first()).toBeVisible();
+  await visitorCtx.close();
+
+  // Admin sees the lead and the interest, and updates the status.
+  await page.goto('/admin/leads');
+  const row = page.getByRole('row', { name: new RegExp(me.name) });
+  await expect(row).toBeVisible();
+  await row.getByRole('combobox').selectOption('contacted');
+  await expect(page.getByText('Status updated.')).toBeVisible();
+  await page.goto('/admin/interests');
+  await expect(page.getByRole('row', { name: new RegExp(me.name) })).toBeVisible();
+
+  // CSV export includes the lead and requires the admin session.
+  const csv = await page.request.get('http://localhost:4000/api/v1/admin/export/leads.csv');
+  expect(csv.status()).toBe(200);
+  expect(await csv.text()).toContain(me.email);
+  const anon = await browser.newContext();
+  expect(
+    (await anon.request.get('http://localhost:4000/api/v1/admin/export/leads.csv')).status(),
+  ).toBe(401);
+  await anon.close();
+});

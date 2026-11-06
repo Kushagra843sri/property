@@ -8,7 +8,7 @@ export function newPerson() {
   n += 1;
   const stamp = `${Date.now()}${n}`;
   return {
-    name: `E2E Visitor ${n}`,
+    name: `E2E Visitor ${stamp}`,
     email: `e2e.${stamp}@example.com`,
     phone: `9${stamp.slice(-9).padStart(9, '1')}`,
   };

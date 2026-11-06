@@ -49,3 +49,28 @@ for (const [width, height] of [
     });
   });
 }
+
+for (const [width, height] of [
+  [1280, 800],
+  [360, 740],
+] as const) {
+  test(`admin pages @${width}`, async ({ page }) => {
+    await page.setViewportSize({ width, height });
+    await page.goto('/admin');
+    await page.getByLabel('Email', { exact: true }).fill('admin@example.com');
+    await page.getByLabel('Password').fill('demo-admin-passphrase-1');
+    await page.getByRole('button', { name: 'Sign in' }).click();
+    await page.getByRole('heading', { name: 'Dashboard' }).waitFor();
+    for (const [name, url] of [
+      ['admin-dashboard', '/admin'],
+      ['admin-listings', '/admin/listings'],
+      ['admin-leads', '/admin/leads'],
+      ['admin-new-listing', '/admin/listings/new'],
+    ]) {
+      await page.goto(url!);
+      await page.waitForLoadState('networkidle');
+      await page.waitForTimeout(700);
+      await page.screenshot({ path: path.join(OUT, `${name}-${width}.png`), fullPage: true });
+    }
+  });
+}

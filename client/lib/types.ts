@@ -51,3 +51,8 @@ export interface User {
   status: 'active' | 'withdrawn';
   consentGiven: boolean;
 }
+
+export interface AdminProperty extends Omit<Property, 'images'> {
+  viewCount?: number;
+  images: { url: string; publicId: string; alt?: string | null; order?: number | null }[];
+}
