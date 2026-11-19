@@ -3,7 +3,8 @@
 import { useState, type FormEvent } from 'react';
 import { ApiError, api } from '@/lib/api';
 import { typeLabel } from '@/lib/format';
-import type { AdminProperty } from '@/lib/types';
+import { useApi } from '@/lib/useApi';
+import type { AdminProperty, AreaOption } from '@/lib/types';
 import { Button } from '@/components/ui/Button';
 import { Field, Input, Select, Textarea } from '@/components/ui/Field';
 
@@ -42,6 +43,7 @@ export function PropertyForm({
   const [formError, setFormError] = useState('');
   const [busy, setBusy] = useState(false);
   const isFlat = type === 'flat';
+  const areas = useApi<AreaOption[]>('/properties/areas');
 
   async function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -209,7 +211,24 @@ export function PropertyForm({
           {(a) => <Input {...a} name="city" defaultValue={d?.address.city} />}
         </Field>
         <Field label="Locality / area">
-          {(a) => <Input {...a} name="locality" defaultValue={d?.address.locality} />}
+          {(a) => (
+            <>
+              {/* Suggest existing areas so one area is not spelled two ways. Free text still works. */}
+              <Input
+                {...a}
+                name="locality"
+                list="admin-area-options"
+                autoComplete="off"
+                maxLength={100}
+                defaultValue={d?.address.locality}
+              />
+              <datalist id="admin-area-options">
+                {(areas.data ?? []).map((ar) => (
+                  <option key={ar.name} value={ar.name} />
+                ))}
+              </datalist>
+            </>
+          )}
         </Field>
         <Field label="Address line">
           {(a) => <Input {...a} name="line" defaultValue={d?.address.line} />}

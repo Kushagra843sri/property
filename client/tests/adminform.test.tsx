@@ -5,7 +5,10 @@ import { describe, expect, it, vi } from 'vitest';
 const api = vi.fn();
 vi.mock('@/lib/api', async () => {
   const actual = await vi.importActual<typeof import('@/lib/api')>('@/lib/api');
-  return { ...actual, api: (...a: unknown[]) => api(...a) };
+  // The area suggestions load on mount: answer them without touching the save-call assertions.
+  const mocked = (path: string, ...rest: unknown[]) =>
+    path === '/properties/areas' ? Promise.resolve({ data: [] }) : api(path, ...rest);
+  return { ...actual, api: mocked };
 });
 
 import { PropertyForm } from '@/components/admin/PropertyForm';
