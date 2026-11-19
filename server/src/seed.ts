@@ -14,7 +14,7 @@ const SAMPLES = [
     bhk: 3,
     bathrooms: 3,
     carpetArea: 1450,
-    locality: 'Locality A',
+    locality: 'Janakpuri',
     featured: true,
   },
   {
@@ -26,7 +26,7 @@ const SAMPLES = [
     bhk: 2,
     bathrooms: 2,
     carpetArea: 980,
-    locality: 'Locality B',
+    locality: 'Dwarka Mor',
     furnishing: 'semi-furnished',
     featured: true,
   },
@@ -39,7 +39,7 @@ const SAMPLES = [
     bhk: 1,
     bathrooms: 1,
     carpetArea: 520,
-    locality: 'Locality A',
+    locality: 'Janakpuri',
   },
   {
     title: '[SAMPLE] Shop on main road',
@@ -48,7 +48,7 @@ const SAMPLES = [
     priceUnit: 'per-month',
     price: 45_000,
     carpetArea: 400,
-    locality: 'Locality C',
+    locality: 'Uttam Nagar East',
   },
   {
     title: '[SAMPLE] Office space for sale',
@@ -56,7 +56,7 @@ const SAMPLES = [
     purpose: 'buy',
     price: 6_500_000,
     carpetArea: 750,
-    locality: 'Locality C',
+    locality: 'Uttam Nagar East',
     featured: true,
   },
   {
@@ -64,9 +64,9 @@ const SAMPLES = [
     type: 'pg',
     purpose: 'rent',
     priceUnit: 'per-month',
-    price: 6_500,
+    price: null,
     carpetArea: 120,
-    locality: 'Locality B',
+    locality: 'Dwarka Mor',
     furnishing: 'furnished',
   },
   {
@@ -77,7 +77,7 @@ const SAMPLES = [
     price: 8_000,
     carpetArea: 150,
     bathrooms: 1,
-    locality: 'Locality A',
+    locality: 'Janakpuri',
     furnishing: 'furnished',
   },
 ] as const;

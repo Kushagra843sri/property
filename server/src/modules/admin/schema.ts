@@ -20,7 +20,7 @@ const propertyFields = {
   description: z.string().trim().max(5000),
   type: z.enum(PROPERTY_TYPES),
   purpose: z.enum(PURPOSES),
-  price: num,
+  price: num.nullable(), // null clears the price
   priceUnit: z.enum(PRICE_UNITS),
   bhk: z.number().int().min(0).max(20),
   bathrooms: z.number().int().min(0).max(20),
@@ -48,7 +48,7 @@ const propertyFields = {
   featured: z.boolean(),
 };
 
-const required = ['title', 'type', 'purpose', 'price', 'address'] as const;
+const required = ['title', 'type', 'purpose', 'address'] as const;
 
 /** BHK is required for flats and meaningless for every other type. Returns an error message or null. */
 export function bhkProblem(type: string | undefined, bhk: number | undefined): string | null {

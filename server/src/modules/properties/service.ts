@@ -3,6 +3,7 @@ import type { QueryFilter, SortOrder } from 'mongoose';
 import { Property, type PropertyDoc } from '../../models/property.js';
 import { AppError } from '../../utils/errors.js';
 import { pageMeta } from '../../utils/pagination.js';
+import { topAreaMatcher } from './areas.js';
 import type { ListQuery } from './schema.js';
 
 const escapeRegex = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -32,7 +33,7 @@ export function toPublic(p: Lean) {
     description: p.description,
     type: p.type,
     purpose: p.purpose,
-    price: p.price,
+    price: p.price ?? null,
     priceUnit: p.priceUnit,
     bhk: p.bhk,
     bathrooms: p.bathrooms,
@@ -67,7 +68,7 @@ const SORT_MAP: Record<ListQuery['sort'], Record<string, SortOrder>> = {
 export function buildFilter(q: ListQuery): QueryFilter<PropertyDoc> {
   const f: QueryFilter<PropertyDoc> = { status: q.status }; // hidden listings are never public
   if (q.city) f['address.city'] = exactCi(q.city);
-  if (q.locality) f['address.locality'] = exactCi(q.locality);
+  if (q.locality) f['address.locality'] = topAreaMatcher(q.locality) ?? exactCi(q.locality);
   if (q.purpose) f.purpose = q.purpose;
   if (q.type) f.type = q.type;
   if (q.bhk !== undefined) f.bhk = q.bhk;

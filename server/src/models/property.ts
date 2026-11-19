@@ -26,7 +26,7 @@ const propertySchema = new Schema(
     description: { type: String, default: '', maxlength: 5000 },
     type: { type: String, enum: PROPERTY_TYPES, required: true },
     purpose: { type: String, enum: PURPOSES, required: true },
-    price: { type: Number, required: true, min: 0 },
+    price: { type: Number, min: 0, default: null }, // optional: the owner negotiates, so many listings have none
     priceUnit: { type: String, enum: PRICE_UNITS, default: 'total' },
     bhk: { type: Number, min: 0, max: 20 },
     bathrooms: { type: Number, min: 0, max: 20 },
@@ -66,6 +66,7 @@ const propertySchema = new Schema(
 
 propertySchema.index({ status: 1, 'address.city': 1, purpose: 1, type: 1, price: 1 });
 propertySchema.index({ bhk: 1 });
+propertySchema.index({ status: 1, 'address.locality': 1 });
 propertySchema.index({ featured: 1, createdAt: -1 });
 propertySchema.index({ title: 'text', 'address.locality': 'text' });
 
