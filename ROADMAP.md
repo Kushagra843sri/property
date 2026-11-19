@@ -31,6 +31,10 @@ Claude: work top-down, one item at a time, tick `[x]` when the definition of don
 - [x] About, Privacy, Terms pages
 - [x] SEO: metadata, sitemap, robots, JSON-LD
 
+- [x] Area search: area field on listings (`address.locality`), dealer's top areas first, others alphabetical; `GET /properties/areas`; "Popular areas" on home
+- [x] Optional price: listings without a price show none; price range filter and price sort hidden behind `FEATURES.priceFilters` (standby)
+- [ ] Before enabling price sort: unpriced listings sort last (Mongo sorts null first ascending)
+
 ## Phase 3 — Accounts and lead flow
 
 - [x] Signup/login/OTP UI with consent checkbox
