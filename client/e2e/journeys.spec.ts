@@ -139,7 +139,7 @@ test('3. admin creates a listing with a photo, sees the new lead and interest, u
   await page.getByRole('button', { name: 'Create listing' }).click();
   await expect(page.getByText('Choose the BHK')).toBeVisible();
   await page.getByLabel('Property type').selectOption('shop');
-  await page.getByLabel('Price in rupees').fill('30000');
+  await page.getByLabel(/Price in rupees/).fill('30000');
   await page.getByLabel('Price is').selectOption('per-month');
   await page.getByLabel('City').fill('Sample City');
   await page.getByRole('button', { name: 'Create listing' }).click();

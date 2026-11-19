@@ -53,7 +53,7 @@ export function PropertyForm({
     const city = str(fd.get('city'));
     const bhk = num(fd.get('bhk'));
     if (!title) next.title = 'Enter a title';
-    if (price === undefined || price < 0) next.price = 'Enter the price';
+    if (price !== undefined && price < 0) next.price = 'Price cannot be negative';
     if (!city) next.city = 'Enter the city';
     if (isFlat && bhk === undefined) next.bhk = 'Choose the BHK';
     if (Object.keys(next).length)
@@ -72,7 +72,7 @@ export function PropertyForm({
       title,
       type,
       purpose: str(fd.get('purpose')),
-      price,
+      price: price ?? null, // empty clears the price, so the listing shows none
       priceUnit: str(fd.get('priceUnit')),
       description: String(fd.get('description') ?? '').trim(),
       status: str(fd.get('status')),
@@ -158,7 +158,11 @@ export function PropertyForm({
             )}
           </Field>
         )}
-        <Field label="Price in rupees" error={errors.price}>
+        <Field
+          label="Price in rupees (optional)"
+          error={errors.price}
+          hint="Leave empty to show no price"
+        >
           {(a) => (
             <Input
               {...a}
@@ -166,7 +170,7 @@ export function PropertyForm({
               type="number"
               min={0}
               step="any"
-              defaultValue={d?.price}
+              defaultValue={d?.price ?? undefined}
               inputMode="numeric"
             />
           )}

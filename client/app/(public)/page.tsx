@@ -5,6 +5,7 @@ import { Reveal } from '@/components/motion/Reveal';
 import { HeroVisual } from '@/components/three/HeroVisual';
 import { LinkButton } from '@/components/ui/Button';
 import { serverGet } from '@/lib/api';
+import type { AreaOption } from '@/lib/types';
 import { SERVICES, SITE } from '@/lib/site';
 import type { Property } from '@/lib/types';
 
@@ -28,8 +29,15 @@ const QUICK = [
   { label: 'Offices', href: '/listings?type=office' },
 ];
 
+/** Top areas that have listings, for the "Popular areas" links. Empty on any failure. */
+async function popularAreas(): Promise<AreaOption[]> {
+  return serverGet<AreaOption[]>('/properties/areas', 300)
+    .then((r) => r.data.filter((a) => a.top && a.count > 0))
+    .catch(() => []);
+}
+
 export default async function HomePage() {
-  const items = await featured();
+  const [items, areas] = await Promise.all([featured(), popularAreas()]);
 
   return (
     <>
@@ -152,6 +160,26 @@ export default async function HomePage() {
           )}
         </div>
       </section>
+
+      {areas.length > 0 && (
+        <section aria-labelledby="areas-title" className="container-page pb-[var(--section-gap)]">
+          <h2 id="areas-title" className="text-[length:var(--text-section)]">
+            Popular areas
+          </h2>
+          <ul className="mt-6 flex flex-wrap gap-2">
+            {areas.map((a) => (
+              <li key={a.name}>
+                <Link
+                  href={`/listings?locality=${encodeURIComponent(a.name)}`}
+                  className="inline-flex min-h-11 items-center rounded-pill border border-line-strong bg-raised px-4 hover:border-ink"
+                >
+                  {a.name}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       <section aria-label="What we do" className="bg-sunken py-[var(--section-gap)]">
         <div className="container-page">

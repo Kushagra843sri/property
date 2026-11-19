@@ -26,11 +26,9 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   const { slug } = await params;
   const p = await load(slug).catch(() => null);
   if (!p) return { title: 'Property not found', robots: { index: false } };
-  const desc =
-    `${specLine(p)} in ${formatLocation(p.address)}, ${formatPrice(p.price, p.priceUnit)}. ${p.description}`.slice(
-      0,
-      160,
-    );
+  const priceText = formatPrice(p.price, p.priceUnit);
+  const head = [`${specLine(p)} in ${formatLocation(p.address)}`, priceText].filter(Boolean);
+  const desc = `${head.join(', ')}. ${p.description}`.slice(0, 160);
   const img = p.images[0]?.url;
   return {
     title: p.title,
@@ -81,7 +79,7 @@ export default async function PropertyPage({ params }: { params: Params }) {
     image: p.images.map((i) => (i.url.startsWith('/') ? `${SITE.url}${i.url}` : i.url)),
     offers: {
       '@type': 'Offer',
-      price: p.price,
+      ...(p.price !== null && { price: p.price }), // omitted when no price is entered
       priceCurrency: 'INR',
       availability: unavailable ? 'https://schema.org/SoldOut' : 'https://schema.org/InStock',
     },
@@ -214,9 +212,11 @@ export default async function PropertyPage({ params }: { params: Params }) {
           className="lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:sticky lg:top-[calc(var(--header-h)+1.5rem)] lg:self-start"
         >
           <div className="rounded-lg border border-line bg-raised p-6 shadow-raised">
-            <p className="font-display text-[2.25rem] leading-none">
-              {formatPrice(p.price, p.priceUnit)}
-            </p>
+            {p.price !== null && (
+              <p className="font-display text-[2.25rem] leading-none">
+                {formatPrice(p.price, p.priceUnit)}
+              </p>
+            )}
             {unavailable ? (
               <p className="mt-4 rounded-md bg-warn-bg px-3 py-2 text-warn" role="status">
                 This property is {p.status}. Ask us about similar ones.

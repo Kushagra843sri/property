@@ -41,9 +41,11 @@ export function PropertyCard({ property: p, priority, index = 0 }: Props) {
       </div>
 
       <div className="flex min-w-0 flex-1 flex-col gap-3 break-words p-5">
-        <p className="font-display text-[1.75rem] leading-none">
-          {formatPrice(p.price, p.priceUnit)}
-        </p>
+        {p.price !== null && (
+          <p className="font-display text-[1.75rem] leading-none">
+            {formatPrice(p.price, p.priceUnit)}
+          </p>
+        )}
         <h3 className="text-xl">
           <Link
             href={`/listings/${p.slug}`}

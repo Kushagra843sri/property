@@ -4,4 +4,7 @@
  */
 export const FEATURES = {
   hero3d: true,
+  // Price range filter and price sort are hidden: the owner negotiates prices, so they are not
+  // revealed up front. The code stays in place; set this to true to bring them back.
+  priceFilters: false,
 } as const;

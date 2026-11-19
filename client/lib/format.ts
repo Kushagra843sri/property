@@ -2,7 +2,11 @@ const inr = new Intl.NumberFormat('en-IN', { maximumFractionDigits: 0 });
 const trim = (n: number) => n.toFixed(2).replace(/\.?0+$/, '');
 
 /** Rupee amounts in Indian convention: crore / lakh above the thresholds, grouped digits below. */
-export function formatPrice(price: number, unit: 'total' | 'per-month' = 'total'): string {
+export function formatPrice(
+  price: number | null,
+  unit: 'total' | 'per-month' = 'total',
+): string | null {
+  if (price === null) return null; // not entered: callers show nothing
   let out: string;
   if (unit === 'per-month' || price < 100_000) out = `₹${inr.format(price)}`;
   else if (price >= 10_000_000) out = `₹${trim(price / 10_000_000)} crore`;

@@ -13,7 +13,7 @@ import {
   toSearchParams,
   type Filters,
 } from '@/lib/listing-query';
-import type { Property } from '@/lib/types';
+import type { AreaOption, Property } from '@/lib/types';
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
@@ -116,6 +116,10 @@ async function Results({ filters }: { filters: Filters }) {
 export default async function ListingsPage({ searchParams }: { searchParams: SearchParams }) {
   const filters = parseFilters(await searchParams);
   const key = toSearchParams(filters).toString();
+  // If the area list cannot load, the area field still works by typing a name.
+  const areas = await serverGet<AreaOption[]>('/properties/areas', 300)
+    .then((r) => r.data)
+    .catch(() => []);
   return (
     <div className="container-page py-10 sm:py-14">
       <nav aria-label="Breadcrumb" className="mb-4 text-sm text-muted">
@@ -125,7 +129,7 @@ export default async function ListingsPage({ searchParams }: { searchParams: Sea
         / <span aria-current="page">Properties</span>
       </nav>
       <h1 className="mb-8 text-[length:var(--text-3xl)]">Properties</h1>
-      <FilterBar filters={filters} />
+      <FilterBar filters={filters} areas={areas} />
       <div className="mt-8">
         <Suspense key={key} fallback={<GridSkeleton />}>
           <Results filters={filters} />

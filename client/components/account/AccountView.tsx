@@ -94,8 +94,10 @@ function Interests() {
                 {r.property.title}
               </Link>
               <p className="text-muted">
-                {formatPrice(r.property.price, r.property.priceUnit)}, {specLine(r.property)} in{' '}
-                {formatLocation(r.property.address)}
+                {[formatPrice(r.property.price, r.property.priceUnit), specLine(r.property)]
+                  .filter(Boolean)
+                  .join(', ')}{' '}
+                in {formatLocation(r.property.address)}
               </p>
             </div>
             <Button variant="ghost" onClick={() => withdraw(r.property.id)}>

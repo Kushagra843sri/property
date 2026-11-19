@@ -3,6 +3,8 @@
  * so every filtered view is shareable, back-button friendly and server-renderable.
  */
 
+import { FEATURES } from './flags';
+
 export const PURPOSES = ['buy', 'rent'] as const;
 // Types the API accepts for filtering; QUICK_TYPES are the ones shown as chips.
 export const TYPES = [
@@ -30,6 +32,7 @@ export interface Filters {
   furnishing?: (typeof FURNISHINGS)[number];
   sort: (typeof SORTS)[number];
   status: (typeof STATUSES)[number];
+  locality?: string;
   q?: string;
   page: number;
 }
@@ -51,12 +54,16 @@ const int = (v: string | undefined, min: number, max: number): number | undefine
 
 /** Parse untrusted URL params into valid filters; anything invalid is dropped, never forwarded. */
 export function parseFilters(raw: Raw): Filters {
-  let minPrice = int(one(raw, 'minPrice'), 0, 1e12);
-  let maxPrice = int(one(raw, 'maxPrice'), 0, 1e12);
+  // Price filters are off by default, so a price in the URL is dropped rather than applied.
+  let minPrice = FEATURES.priceFilters ? int(one(raw, 'minPrice'), 0, 1e12) : undefined;
+  let maxPrice = FEATURES.priceFilters ? int(one(raw, 'maxPrice'), 0, 1e12) : undefined;
   if (minPrice !== undefined && maxPrice !== undefined && minPrice > maxPrice) {
     [minPrice, maxPrice] = [maxPrice, minPrice];
   }
+  const sort = pick(SORTS, one(raw, 'sort'));
+  const priceSort = sort === 'price_asc' || sort === 'price_desc';
   const q = one(raw, 'q')?.trim().slice(0, 100);
+  const locality = one(raw, 'locality')?.trim().slice(0, 100);
   const type = pick(TYPES, one(raw, 'type'));
   return {
     purpose: pick(PURPOSES, one(raw, 'purpose')),
@@ -66,8 +73,9 @@ export function parseFilters(raw: Raw): Filters {
     minPrice,
     maxPrice,
     furnishing: pick(FURNISHINGS, one(raw, 'furnishing')),
-    sort: pick(SORTS, one(raw, 'sort')) ?? 'newest',
+    sort: (priceSort && !FEATURES.priceFilters ? undefined : sort) ?? 'newest',
     status: pick(STATUSES, one(raw, 'status')) ?? 'available',
+    locality: locality || undefined,
     q: q || undefined,
     page: int(one(raw, 'page'), 1, 10_000) ?? 1,
   };
@@ -94,7 +102,16 @@ export function toApiQuery(f: Filters, limit = 9): Record<string, string | numbe
     page: f.page,
     limit,
   };
-  for (const k of ['purpose', 'type', 'bhk', 'minPrice', 'maxPrice', 'furnishing', 'q'] as const) {
+  for (const k of [
+    'purpose',
+    'type',
+    'bhk',
+    'minPrice',
+    'maxPrice',
+    'furnishing',
+    'locality',
+    'q',
+  ] as const) {
     const v = f[k];
     if (v !== undefined) out[k] = v;
   }
@@ -103,7 +120,7 @@ export function toApiQuery(f: Filters, limit = 9): Record<string, string | numbe
 
 /** Number of active filters (excludes sort, status and page) for the badge on the mobile toggle. */
 export const activeCount = (f: Filters): number =>
-  ['purpose', 'type', 'bhk', 'minPrice', 'maxPrice', 'furnishing', 'q'].filter(
+  ['purpose', 'type', 'bhk', 'minPrice', 'maxPrice', 'furnishing', 'locality', 'q'].filter(
     (k) => f[k as keyof Filters] !== undefined,
   ).length;
 

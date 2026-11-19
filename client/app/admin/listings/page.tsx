@@ -111,7 +111,7 @@ export default function ListingsAdmin() {
                     {typeLabel(p.type)}, {p.purpose === 'rent' ? 'rent' : 'sale'}, {p.address.city}
                   </p>
                 </Td>
-                <Td>{formatPrice(p.price, p.priceUnit)}</Td>
+                <Td>{formatPrice(p.price, p.priceUnit) ?? '—'}</Td>
                 <Td>
                   <Select
                     aria-label={`Status of ${p.title}`}

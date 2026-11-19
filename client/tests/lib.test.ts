@@ -8,6 +8,9 @@ import { SITE, whatsappLink } from '@/lib/site';
 import { checkContrast } from '../scripts/contrast.mjs';
 
 describe('formatPrice', () => {
+  it('returns null when no price was entered', () => {
+    expect(formatPrice(null)).toBeNull();
+  });
   it.each([
     [8_500_000, 'total', '₹85 lakh'],
     [24_000_000, 'total', '₹2.4 crore'],
@@ -66,19 +69,32 @@ describe('listing filters <-> URL', () => {
       type: ['villa', 'x'],
       q: '  hello  ',
     });
-    expect([f.minPrice, f.maxPrice, f.type, f.q]).toEqual([100, 900, 'villa', 'hello']);
+    // Price filters are switched off (FEATURES.priceFilters), so price params are dropped.
+    expect([f.minPrice, f.maxPrice, f.type, f.q]).toEqual([undefined, undefined, 'villa', 'hello']);
     expect(parseFilters({ type: '$ne', purpose: '../x' }).type).toBeUndefined();
+  });
+  it('drops price sort while price filters are off', () => {
+    expect(parseFilters({ sort: 'price_asc' }).sort).toBe('newest');
+    expect(parseFilters({ sort: 'featured' }).sort).toBe('featured');
+  });
+  it('keeps the area and clears it when blank', () => {
+    expect(parseFilters({ locality: '  Dwarka (any sector) ' }).locality).toBe(
+      'Dwarka (any sector)',
+    );
+    expect(parseFilters({ locality: '   ' }).locality).toBeUndefined();
+    expect(toApiQuery(parseFilters({ locality: 'Janakpuri' })).locality).toBe('Janakpuri');
   });
   it('round-trips through the URL without defaults', () => {
     const f = parseFilters({
       purpose: 'buy',
       type: 'flat',
       bhk: '3',
-      sort: 'price_asc',
+      sort: 'featured',
+      locality: 'Nawada',
       page: '2',
     });
     const qs = toSearchParams(f).toString();
-    expect(qs).toBe('purpose=buy&type=flat&bhk=3&sort=price_asc&page=2');
+    expect(qs).toBe('purpose=buy&type=flat&bhk=3&sort=featured&locality=Nawada&page=2');
     expect(parseFilters(new URLSearchParams(qs))).toEqual(f);
     expect(toSearchParams(parseFilters({})).toString()).toBe('');
   });

@@ -20,7 +20,7 @@ describe('admin PropertyForm', () => {
     await u.selectOptions(screen.getByLabelText('Property type'), 'flat');
 
     await u.type(screen.getByLabelText('Title'), 'A flat');
-    await u.type(screen.getByLabelText('Price in rupees'), '10000');
+    await u.type(screen.getByLabelText(/Price in rupees/), '10000');
     await u.type(screen.getByLabelText('City'), 'X');
     await u.click(screen.getByRole('button', { name: 'Create listing' }));
     expect(await screen.findByText('Choose the BHK')).toBeInTheDocument();
@@ -33,7 +33,7 @@ describe('admin PropertyForm', () => {
     render(<PropertyForm onSaved={() => undefined} />);
     await u.selectOptions(screen.getByLabelText('Property type'), 'room');
     await u.type(screen.getByLabelText('Title'), 'Room');
-    await u.type(screen.getByLabelText('Price in rupees'), '8000');
+    await u.type(screen.getByLabelText(/Price in rupees/), '8000');
     await u.type(screen.getByLabelText('City'), 'X');
     await u.click(screen.getByRole('button', { name: 'Create listing' }));
     const body = api.mock.calls[0]![1].body;

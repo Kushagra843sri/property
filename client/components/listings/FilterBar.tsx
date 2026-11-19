@@ -13,7 +13,9 @@ import {
 } from '@/lib/listing-query';
 import { typeLabel } from '@/lib/format';
 import { cn } from '@/lib/cn';
-import { Select } from '@/components/ui/Field';
+import { FEATURES } from '@/lib/flags';
+import type { AreaOption } from '@/lib/types';
+import { Input, Select } from '@/components/ui/Field';
 
 const BHKS = [1, 2, 3, 4, 5];
 
@@ -45,18 +47,24 @@ function Chip({
   );
 }
 
-export function FilterBar({ filters }: { filters: Filters }) {
+export function FilterBar({ filters, areas }: { filters: Filters; areas: AreaOption[] }) {
   const router = useRouter();
   const pathname = usePathname();
   const [isPending, startTransition] = useTransition();
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState(filters.q ?? '');
+  const [area, setArea] = useState(filters.locality ?? '');
 
-  // Keep the box in step with the URL (back/forward, clear) without an effect.
+  // Keep the boxes in step with the URL (back/forward, clear) without an effect.
   const [seenQ, setSeenQ] = useState(filters.q);
   if (seenQ !== filters.q) {
     setSeenQ(filters.q);
     setQ(filters.q ?? '');
+  }
+  const [seenArea, setSeenArea] = useState(filters.locality);
+  if (seenArea !== filters.locality) {
+    setSeenArea(filters.locality);
+    setArea(filters.locality ?? '');
   }
 
   const apply = (patch: Partial<Filters>) => {
@@ -78,6 +86,19 @@ export function FilterBar({ filters }: { filters: Filters }) {
   const onSearch = (e: FormEvent) => {
     e.preventDefault();
     apply({ q: q.trim() || undefined });
+  };
+
+  // Apply an area as soon as it is an exact name from the list (or cleared); typed text waits for Enter.
+  const onAreaChange = (value: string) => {
+    setArea(value);
+    const v = value.trim();
+    if (v === '' || areas.some((a) => a.name.toLowerCase() === v.toLowerCase())) {
+      apply({ locality: v || undefined });
+    }
+  };
+  const onAreaSubmit = (e: FormEvent) => {
+    e.preventDefault();
+    apply({ locality: area.trim() || undefined });
   };
 
   return (
@@ -189,27 +210,52 @@ export function FilterBar({ filters }: { filters: Filters }) {
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <label className="flex flex-col gap-1.5 text-sm font-medium">
-            Budget
-            <Select
-              disabled={!budgets}
-              value={budgetIndex >= 0 ? String(budgetIndex) : ''}
-              onChange={(e) => {
-                const b = budgets?.[Number(e.target.value)];
-                apply({
-                  minPrice: b && 'min' in b ? b.min : undefined,
-                  maxPrice: b && 'max' in b ? b.max : undefined,
-                });
-              }}
-            >
-              <option value="">{budgets ? 'Any budget' : 'Choose Buy or Rent first'}</option>
-              {budgets?.map((b, i) => (
-                <option key={b.label} value={i}>
-                  {b.label}
-                </option>
+          <form onSubmit={onAreaSubmit} className="flex flex-col gap-1.5 text-sm font-medium">
+            <label htmlFor="listing-area">Area</label>
+            <Input
+              id="listing-area"
+              name="locality"
+              list="listing-area-options"
+              autoComplete="off"
+              placeholder="Type or pick an area"
+              value={area}
+              maxLength={100}
+              onChange={(e) => onAreaChange(e.target.value)}
+              onBlur={onAreaSubmit}
+            />
+            <datalist id="listing-area-options">
+              {areas.map((a) => (
+                <option
+                  key={a.name}
+                  value={a.name}
+                  label={`${a.count} ${a.count === 1 ? 'property' : 'properties'}`}
+                />
               ))}
-            </Select>
-          </label>
+            </datalist>
+          </form>
+          {FEATURES.priceFilters && (
+            <label className="flex flex-col gap-1.5 text-sm font-medium">
+              Budget
+              <Select
+                disabled={!budgets}
+                value={budgetIndex >= 0 ? String(budgetIndex) : ''}
+                onChange={(e) => {
+                  const b = budgets?.[Number(e.target.value)];
+                  apply({
+                    minPrice: b && 'min' in b ? b.min : undefined,
+                    maxPrice: b && 'max' in b ? b.max : undefined,
+                  });
+                }}
+              >
+                <option value="">{budgets ? 'Any budget' : 'Choose Buy or Rent first'}</option>
+                {budgets?.map((b, i) => (
+                  <option key={b.label} value={i}>
+                    {b.label}
+                  </option>
+                ))}
+              </Select>
+            </label>
+          )}
           <label className="flex flex-col gap-1.5 text-sm font-medium">
             Furnishing
             <Select
@@ -233,8 +279,8 @@ export function FilterBar({ filters }: { filters: Filters }) {
               onChange={(e) => apply({ sort: e.target.value as Filters['sort'] })}
             >
               <option value="newest">Newest first</option>
-              <option value="price_asc">Price, low to high</option>
-              <option value="price_desc">Price, high to low</option>
+              {FEATURES.priceFilters && <option value="price_asc">Price, low to high</option>}
+              {FEATURES.priceFilters && <option value="price_desc">Price, high to low</option>}
               <option value="featured">Featured first</option>
             </Select>
           </label>
@@ -254,6 +300,7 @@ export function FilterBar({ filters }: { filters: Filters }) {
               className="min-h-11 px-2 text-sm font-medium text-forest underline underline-offset-2"
               onClick={() => {
                 setQ('');
+                setArea('');
                 apply({
                   purpose: undefined,
                   type: undefined,
@@ -261,6 +308,7 @@ export function FilterBar({ filters }: { filters: Filters }) {
                   minPrice: undefined,
                   maxPrice: undefined,
                   furnishing: undefined,
+                  locality: undefined,
                   q: undefined,
                 });
               }}
