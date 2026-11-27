@@ -12,14 +12,8 @@ export const metadata: Metadata = {
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 const first = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
 
-function osm(lat: number, lng: number) {
-  const d = 0.006;
-  return `https://www.openstreetmap.org/export/embed.html?bbox=${lng - d},${lat - d},${lng + d},${lat + d}&layer=mapnik&marker=${lat},${lng}`;
-}
-
 export default async function ContactPage({ searchParams }: { searchParams: SearchParams }) {
   const sp = await searchParams;
-  const a = SITE.address;
   const row = 'inline-flex min-h-11 items-center gap-3 hover:underline';
   return (
     <div className="container-page py-10 sm:py-14">
@@ -49,14 +43,9 @@ export default async function ContactPage({ searchParams }: { searchParams: Sear
             <a href={`mailto:${SITE.email}`} className={row}>
               <Mail size={18} aria-hidden /> {SITE.email}
             </a>
-            <p className="mt-2 flex gap-3">
-              <MapPin size={18} className="mt-1 shrink-0" aria-hidden />
-              <span>
-                {a.line}, {a.locality}
-                <br />
-                {a.city}, {a.state} {a.pincode}
-              </span>
-            </p>
+            <a href={SITE.mapUrl} className={row} target="_blank" rel="noopener noreferrer">
+              <MapPin size={18} aria-hidden /> Find our shop on Google Maps
+            </a>
           </address>
 
           <section aria-labelledby="hours">
@@ -72,16 +61,6 @@ export default async function ContactPage({ searchParams }: { searchParams: Sear
               ))}
             </dl>
           </section>
-
-          <div className="aspect-[4/3] overflow-hidden rounded-lg border border-line">
-            <iframe
-              title="Map showing the office location"
-              src={osm(SITE.geo.lat, SITE.geo.lng)}
-              loading="lazy"
-              referrerPolicy="no-referrer"
-              className="size-full"
-            />
-          </div>
         </div>
       </div>
     </div>

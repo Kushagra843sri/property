@@ -6,7 +6,6 @@ import { Wordmark } from './Wordmark';
 const row = 'inline-flex min-h-8 items-center gap-3 hover:underline';
 
 export function Footer() {
-  const a = SITE.address;
   return (
     <footer className="on-dark mt-24 bg-forest-deep pb-24 text-on-forest md:pb-0">
       <div className="container-page grid gap-12 py-16 md:grid-cols-[1.2fr_1fr_1fr]">
@@ -30,14 +29,9 @@ export function Footer() {
           <a href={`mailto:${SITE.email}`} className={row}>
             <Mail size={18} aria-hidden /> {SITE.email}
           </a>
-          <p className="flex gap-3">
-            <MapPin size={18} className="mt-1 shrink-0" aria-hidden />
-            <span>
-              {a.line}, {a.locality}
-              <br />
-              {a.city}, {a.state} {a.pincode}
-            </span>
-          </p>
+          <a href={SITE.mapUrl} className={row} rel="noopener noreferrer" target="_blank">
+            <MapPin size={18} aria-hidden /> Find us on Google Maps
+          </a>
           <p className="flex gap-3">
             <Clock size={18} className="mt-1 shrink-0" aria-hidden />
             <span>
