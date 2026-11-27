@@ -4,7 +4,7 @@ import { pageWindow } from '@/components/listings/Pagination';
 import { buildQuery } from '@/lib/api';
 import { formatArea, formatPrice, specLine, typeLabel } from '@/lib/format';
 import { activeCount, parseFilters, toApiQuery, toSearchParams } from '@/lib/listing-query';
-import { SITE, whatsappLink } from '@/lib/site';
+import { SITE, listingWhatsappLink, whatsappLink } from '@/lib/site';
 import { checkContrast } from '../scripts/contrast.mjs';
 
 describe('formatPrice', () => {
@@ -126,6 +126,16 @@ describe('site constants', () => {
     expect(SITE.phoneHref).toBe(SITE.phones[0]!.href);
     expect(whatsappLink('hi there')).toContain(`wa.me/${SITE.whatsappNumber}`);
     expect(whatsappLink('hi there')).toContain('hi%20there');
+  });
+
+  it('builds the per-listing WhatsApp message with the title and the listing link', () => {
+    const link = decodeURIComponent(
+      listingWhatsappLink({ title: 'Garden Villa', slug: 'garden-villa-1' }),
+    );
+    expect(link).toContain(`wa.me/${SITE.whatsappNumber}`);
+    expect(link).toContain('Need details regarding it.');
+    expect(link).toContain('Garden Villa');
+    expect(link).toContain('/listings/garden-villa-1');
   });
 });
 

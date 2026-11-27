@@ -17,7 +17,7 @@ interface Lead {
   id: string;
   name: string;
   email: string;
-  phone: string;
+  phone: string | null; // Google sign-ups may not have given one yet
   status: string;
   leadStatus: string;
   consentGiven: boolean;
@@ -71,9 +71,13 @@ function LeadRow({ lead, onChanged }: { lead: Lead; onChanged: () => void }) {
           )}
         </Td>
         <Td>
-          <a href={`tel:${lead.phone}`} className="hover:underline">
-            {lead.phone}
-          </a>
+          {lead.phone ? (
+            <a href={`tel:${lead.phone}`} className="hover:underline">
+              {lead.phone}
+            </a>
+          ) : (
+            <span className="text-muted">No phone yet</span>
+          )}
           <br />
           <a href={`mailto:${lead.email}`} className="text-sm text-muted hover:underline">
             {lead.email}

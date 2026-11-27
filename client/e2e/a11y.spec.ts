@@ -110,7 +110,8 @@ test.describe('axe: dialogs and keyboard', () => {
     await page.getByRole('button', { name: 'Sign in' }).first().focus();
     await page.keyboard.press('Enter');
     await expect(page.getByRole('dialog')).toBeVisible();
-    await expect(page.getByLabel('Email or phone')).toBeVisible();
+    await expect(page.getByLabel('Email', { exact: true })).toBeVisible();
+    await expect(page.getByLabel('Password', { exact: true })).toBeVisible();
     await page.keyboard.press('Escape');
     await expect(page.getByRole('dialog')).toBeHidden();
   });

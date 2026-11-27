@@ -42,6 +42,7 @@ export interface Property {
   geo?: { lat?: number; lng?: number };
   amenities: string[];
   images: PropertyImage[];
+  videoUrl?: string | null; // Bunny Stream player link
   status: 'available' | 'sold' | 'rented' | 'hidden';
   featured: boolean;
   createdAt?: string;
@@ -51,7 +52,7 @@ export interface User {
   id: string;
   name: string;
   email: string;
-  phone: string;
+  phone: string | null; // Google sign-ups add it before their first "Interested"
   role: 'user' | 'admin';
   emailVerified: boolean;
   phoneVerified: boolean;

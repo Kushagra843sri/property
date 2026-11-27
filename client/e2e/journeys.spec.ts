@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { newPerson, signUp } from './helpers';
+import { PASSWORD, newPerson, signUp } from './helpers';
 
 test.describe('critical journeys', () => {
   test('1. visitor browses, filters and opens a listing', async ({ page }) => {
@@ -35,8 +35,9 @@ test.describe('critical journeys', () => {
     await dialog.getByLabel('Full name').fill(me.name);
     await dialog.getByLabel('Email', { exact: true }).fill(me.email);
     await dialog.getByLabel('Phone', { exact: true }).fill(me.phone);
+    await dialog.getByLabel('Password', { exact: true }).fill(PASSWORD);
     await expect(dialog.getByRole('checkbox')).not.toBeChecked();
-    await dialog.getByRole('button', { name: 'Send me a code' }).click();
+    await dialog.getByRole('button', { name: 'Create account' }).click();
     await expect(dialog.getByText('Please tick the box to continue')).toBeVisible();
 
     await signUp(page, me);

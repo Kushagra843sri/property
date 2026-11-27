@@ -1,12 +1,15 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useState, type FormEvent } from 'react';
+import Script from 'next/script';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { ApiError, api } from '@/lib/api';
 import type { User } from '@/lib/types';
 import {
+  PASSWORD_MIN,
   codeSchema,
   fieldErrors,
+  forgotSchema,
   loginSchema,
   serverFieldErrors,
   signupSchema,
@@ -16,8 +19,20 @@ import { Button } from '@/components/ui/Button';
 import { Dialog } from '@/components/ui/Dialog';
 import { Field, Input } from '@/components/ui/Field';
 
-type Mode = 'signup' | 'login' | 'verify';
+type Mode = 'signup' | 'login' | 'forgot' | 'verify';
 const RESEND_SECONDS = 60;
+/** Public OAuth client ID. When unset, the Google button is simply not shown. */
+const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+
+interface GoogleId {
+  initialize(o: { client_id: string; callback: (r: { credential: string }) => void }): void;
+  renderButton(el: HTMLElement, o: Record<string, unknown>): void;
+}
+declare global {
+  interface Window {
+    google?: { accounts: { id: GoogleId } };
+  }
+}
 
 interface Props {
   open: boolean;
@@ -35,12 +50,77 @@ export function AuthDialog({ open, initialMode, onClose, onAuthenticated }: Prop
   );
 }
 
+/** Google's own sign-in button (popup flow). Hidden unless a client ID is configured. */
+function GoogleButton({
+  text,
+  onCredential,
+}: {
+  text: 'signin_with' | 'signup_with';
+  onCredential: (credential: string) => void;
+}) {
+  const box = useRef<HTMLDivElement>(null);
+  const latest = useRef(onCredential);
+  const [ready, setReady] = useState(() => typeof window !== 'undefined' && !!window.google);
+
+  useEffect(() => {
+    latest.current = onCredential;
+  });
+  useEffect(() => {
+    if (!ready || !box.current || !window.google || !GOOGLE_CLIENT_ID) return;
+    window.google.accounts.id.initialize({
+      client_id: GOOGLE_CLIENT_ID,
+      callback: (r) => latest.current(r.credential),
+    });
+    window.google.accounts.id.renderButton(box.current, {
+      type: 'standard',
+      theme: 'outline',
+      size: 'large',
+      text,
+      width: 300,
+    });
+  }, [ready, text]);
+
+  if (!GOOGLE_CLIENT_ID) return null;
+  return (
+    <>
+      <p className="my-1 text-center text-sm text-muted">or</p>
+      <Script
+        src="https://accounts.google.com/gsi/client"
+        strategy="afterInteractive"
+        onReady={() => setReady(true)}
+      />
+      <div ref={box} className="flex min-h-11 justify-center" />
+    </>
+  );
+}
+
+const Honeypot = () => (
+  <input
+    name="website"
+    tabIndex={-1}
+    autoComplete="off"
+    aria-hidden
+    className="absolute -left-[9999px] h-0 w-0 opacity-0"
+  />
+);
+
+const FormError = ({ text }: { text: string }) =>
+  text ? (
+    <p role="alert" className="rounded-md bg-error-bg px-3 py-2 text-sm text-error">
+      {text}
+    </p>
+  ) : null;
+
 function AuthFlow({
   initialMode,
   onAuthenticated,
 }: Pick<Props, 'initialMode' | 'onAuthenticated'>) {
   const [mode, setMode] = useState<Mode>(initialMode);
   const [identifier, setIdentifier] = useState('');
+  // Held only in memory: sent together with the emailed code, which is what proves the inbox is theirs.
+  const [pendingPassword, setPendingPassword] = useState('');
+  const [consent, setConsent] = useState(false);
+  const [needNewPassword, setNeedNewPassword] = useState(false);
   const [errors, setErrors] = useState<FieldErrors>({});
   const [formError, setFormError] = useState('');
   const [busy, setBusy] = useState(false);
@@ -51,6 +131,15 @@ function AuthFlow({
     const t = setTimeout(() => setCooldown((c) => c - 1), 1000);
     return () => clearTimeout(t);
   }, [cooldown]);
+
+  const reset = () => {
+    setErrors({});
+    setFormError('');
+  };
+  const goto = (m: Mode) => {
+    setMode(m);
+    reset();
+  };
 
   const fail = (err: unknown) => {
     if (err instanceof ApiError) {
@@ -69,19 +158,27 @@ function AuthFlow({
       name: String(fd.get('name') ?? ''),
       email: String(fd.get('email') ?? ''),
       phone: String(fd.get('phone') ?? ''),
-      consent: fd.get('consent') === 'on',
+      password: String(fd.get('password') ?? ''),
+      consent,
     };
     const parsed = signupSchema.safeParse(values);
     if (!parsed.success) return (setErrors(fieldErrors(parsed.error)), setFormError(''));
     setBusy(true);
-    setErrors({});
-    setFormError('');
+    reset();
     try {
+      // The password is deliberately NOT sent here; it goes with the code in the next step.
       await api('/auth/signup', {
         method: 'POST',
-        body: { ...values, consent: true, website: String(fd.get('website') ?? '') },
+        body: {
+          name: values.name,
+          email: values.email,
+          phone: values.phone,
+          consent: true,
+          website: String(fd.get('website') ?? ''),
+        },
       });
       setIdentifier(values.email.trim().toLowerCase());
+      setPendingPassword(values.password);
       setCooldown(RESEND_SECONDS);
       setMode('verify');
     } catch (err) {
@@ -95,17 +192,44 @@ function AuthFlow({
     e.preventDefault();
     if (busy) return;
     const fd = new FormData(e.currentTarget);
-    const parsed = loginSchema.safeParse({ identifier: String(fd.get('identifier') ?? '') });
+    const parsed = loginSchema.safeParse({
+      email: String(fd.get('email') ?? ''),
+      password: String(fd.get('password') ?? ''),
+    });
     if (!parsed.success) return (setErrors(fieldErrors(parsed.error)), setFormError(''));
     setBusy(true);
-    setErrors({});
-    setFormError('');
+    reset();
+    try {
+      const res = await api<{ user: User }>('/auth/login', {
+        method: 'POST',
+        body: parsed.data,
+      });
+      onAuthenticated(res.data.user);
+    } catch (err) {
+      fail(err);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function submitForgot(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (busy) return;
+    const fd = new FormData(e.currentTarget);
+    const parsed = forgotSchema.safeParse({
+      email: String(fd.get('email') ?? ''),
+      password: String(fd.get('password') ?? ''),
+    });
+    if (!parsed.success) return (setErrors(fieldErrors(parsed.error)), setFormError(''));
+    setBusy(true);
+    reset();
     try {
       await api('/auth/otp/request', {
         method: 'POST',
-        body: { identifier: parsed.data.identifier, website: String(fd.get('website') ?? '') },
+        body: { identifier: parsed.data.email, website: String(fd.get('website') ?? '') },
       });
-      setIdentifier(parsed.data.identifier);
+      setIdentifier(parsed.data.email.trim().toLowerCase());
+      setPendingPassword(parsed.data.password);
       setCooldown(RESEND_SECONDS);
       setMode('verify');
     } catch (err) {
@@ -121,17 +245,25 @@ function AuthFlow({
     const fd = new FormData(e.currentTarget);
     const parsed = codeSchema.safeParse({ code: String(fd.get('code') ?? '').trim() });
     if (!parsed.success) return (setErrors(fieldErrors(parsed.error)), setFormError(''));
+    const replacement = String(fd.get('password') ?? '');
+    const password = needNewPassword ? replacement : pendingPassword;
+    if (needNewPassword && replacement.length < PASSWORD_MIN)
+      return (setErrors({ password: `Use at least ${PASSWORD_MIN} characters` }), setFormError(''));
     setBusy(true);
-    setErrors({});
-    setFormError('');
+    reset();
     try {
       const res = await api<{ user: User }>('/auth/otp/verify', {
         method: 'POST',
-        body: { identifier, code: parsed.data.code },
+        body: { identifier, code: parsed.data.code, password },
       });
       onAuthenticated(res.data.user);
     } catch (err) {
-      fail(err);
+      // The server checks the password before spending the code, so the same code still works.
+      if (err instanceof ApiError && err.details?.some((d) => d.path.endsWith('password'))) {
+        setNeedNewPassword(true);
+        setErrors(serverFieldErrors(err.details)); // shown once, on the new password field
+        setFormError('');
+      } else fail(err);
     } finally {
       setBusy(false);
     }
@@ -151,12 +283,38 @@ function AuthFlow({
     }
   }
 
+  async function googleSignIn(credential: string) {
+    if (busy) return;
+    setBusy(true);
+    reset();
+    try {
+      const res = await api<{ user: User }>('/auth/google', {
+        method: 'POST',
+        body: { credential, consent },
+      });
+      onAuthenticated(res.data.user);
+    } catch (err) {
+      if (err instanceof ApiError && err.code === 'consent_required') {
+        // A new account needs the consent box; send them to the form that has it.
+        setMode('signup');
+        setErrors({ consent: 'Please tick the box to continue' });
+        setFormError('Tick the box below, then choose Google again to create your account.');
+      } else fail(err);
+    } finally {
+      setBusy(false);
+    }
+  }
+
   const title =
     mode === 'signup'
       ? 'Create your account'
       : mode === 'login'
         ? 'Welcome back'
-        : 'Enter your code';
+        : mode === 'forgot'
+          ? 'Reset your password'
+          : 'Enter your code';
+
+  const linkBtn = 'font-medium text-forest underline underline-offset-2';
 
   return (
     <>
@@ -177,19 +335,29 @@ function AuthFlow({
             <Field label="Phone" error={errors.phone}>
               {(a) => <Input {...a} name="phone" type="tel" autoComplete="tel" required />}
             </Field>
-            {/* Honeypot: invisible to people, tempting to bots. */}
-            <input
-              name="website"
-              tabIndex={-1}
-              autoComplete="off"
-              aria-hidden
-              className="absolute -left-[9999px] h-0 w-0 opacity-0"
-            />
+            <Field
+              label="Password"
+              error={errors.password}
+              hint={`At least ${PASSWORD_MIN} characters`}
+            >
+              {(a) => (
+                <Input
+                  {...a}
+                  name="password"
+                  type="password"
+                  autoComplete="new-password"
+                  required
+                />
+              )}
+            </Field>
+            <Honeypot />
             <div>
               <label className="flex min-h-11 items-start gap-3 text-sm">
                 <input
                   type="checkbox"
                   name="consent"
+                  checked={consent}
+                  onChange={(e) => setConsent(e.target.checked)}
                   className="mt-0.5 size-5 shrink-0 accent-[var(--forest)]"
                   aria-invalid={!!errors.consent}
                   aria-describedby={errors.consent ? 'consent-error' : undefined}
@@ -213,26 +381,15 @@ function AuthFlow({
                 </p>
               )}
             </div>
-            {formError && (
-              <p role="alert" className="rounded-md bg-error-bg px-3 py-2 text-sm text-error">
-                {formError}
-              </p>
-            )}
+            <FormError text={formError} />
             <Button type="submit" size="lg" loading={busy}>
-              Send me a code
+              Create account
             </Button>
+            <GoogleButton text="signup_with" onCredential={googleSignIn} />
           </form>
           <p className="mt-5 text-sm text-muted">
             Already have an account?{' '}
-            <button
-              type="button"
-              className="font-medium text-forest underline underline-offset-2"
-              onClick={() => {
-                setMode('login');
-                setErrors({});
-                setFormError('');
-              }}
-            >
+            <button type="button" className={linkBtn} onClick={() => goto('login')}>
               Sign in
             </button>
           </p>
@@ -241,39 +398,75 @@ function AuthFlow({
 
       {mode === 'login' && (
         <>
-          <p className="mt-2 text-muted">We will send a one-time code to your email or phone.</p>
+          <p className="mt-2 text-muted">Sign in with your email and password.</p>
           <form onSubmit={submitLogin} noValidate className="mt-6 flex flex-col gap-4">
-            <Field label="Email or phone" error={errors.identifier}>
-              {(a) => <Input {...a} name="identifier" autoComplete="username" required />}
+            <Field label="Email" error={errors.email}>
+              {(a) => <Input {...a} name="email" type="email" autoComplete="username" required />}
             </Field>
-            <input
-              name="website"
-              tabIndex={-1}
-              autoComplete="off"
-              aria-hidden
-              className="absolute -left-[9999px] h-0 w-0 opacity-0"
-            />
-            {formError && (
-              <p role="alert" className="rounded-md bg-error-bg px-3 py-2 text-sm text-error">
-                {formError}
-              </p>
-            )}
+            <Field label="Password" error={errors.password}>
+              {(a) => (
+                <Input
+                  {...a}
+                  name="password"
+                  type="password"
+                  autoComplete="current-password"
+                  required
+                />
+              )}
+            </Field>
+            <FormError text={formError} />
+            <Button type="submit" size="lg" loading={busy}>
+              Sign in
+            </Button>
+            <GoogleButton text="signin_with" onCredential={googleSignIn} />
+          </form>
+          <p className="mt-5 flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted">
+            <button type="button" className={linkBtn} onClick={() => goto('forgot')}>
+              Forgot password?
+            </button>
+            <span>
+              New here?{' '}
+              <button type="button" className={linkBtn} onClick={() => goto('signup')}>
+                Create an account
+              </button>
+            </span>
+          </p>
+        </>
+      )}
+
+      {mode === 'forgot' && (
+        <>
+          <p className="mt-2 text-muted">
+            Choose a new password. We will email a code to confirm it is you.
+          </p>
+          <form onSubmit={submitForgot} noValidate className="mt-6 flex flex-col gap-4">
+            <Field label="Email" error={errors.email}>
+              {(a) => <Input {...a} name="email" type="email" autoComplete="email" required />}
+            </Field>
+            <Field
+              label="New password"
+              error={errors.password}
+              hint={`At least ${PASSWORD_MIN} characters`}
+            >
+              {(a) => (
+                <Input
+                  {...a}
+                  name="password"
+                  type="password"
+                  autoComplete="new-password"
+                  required
+                />
+              )}
+            </Field>
+            <Honeypot />
+            <FormError text={formError} />
             <Button type="submit" size="lg" loading={busy}>
               Send me a code
             </Button>
           </form>
           <p className="mt-5 text-sm text-muted">
-            New here?{' '}
-            <button
-              type="button"
-              className="font-medium text-forest underline underline-offset-2"
-              onClick={() => {
-                setMode('signup');
-                setErrors({});
-                setFormError('');
-              }}
-            >
-              Create an account
+            <button type="button" className={linkBtn} onClick={() => goto('login')}>
+              Back to sign in
             </button>
           </p>
         </>
@@ -300,11 +493,20 @@ function AuthFlow({
                 />
               )}
             </Field>
-            {formError && (
-              <p role="alert" className="rounded-md bg-error-bg px-3 py-2 text-sm text-error">
-                {formError}
-              </p>
+            {needNewPassword && (
+              <Field label="Choose a different password" error={errors.password}>
+                {(a) => (
+                  <Input
+                    {...a}
+                    name="password"
+                    type="password"
+                    autoComplete="new-password"
+                    required
+                  />
+                )}
+              </Field>
             )}
+            <FormError text={formError} />
             <Button type="submit" size="lg" loading={busy}>
               Verify and continue
             </Button>
@@ -315,7 +517,7 @@ function AuthFlow({
               type="button"
               onClick={resend}
               disabled={cooldown > 0 || busy}
-              className="font-medium text-forest underline underline-offset-2 disabled:no-underline disabled:opacity-60"
+              className={`${linkBtn} disabled:no-underline disabled:opacity-60`}
             >
               {cooldown > 0 ? `Resend in ${cooldown}s` : 'Send a new code'}
             </button>

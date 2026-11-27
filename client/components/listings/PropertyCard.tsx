@@ -1,5 +1,6 @@
 import Link from 'next/link';
-import { Bath, BedDouble, Ruler } from 'lucide-react';
+import { Bath, BedDouble, MessageCircle, Ruler } from 'lucide-react';
+import { listingWhatsappLink } from '@/lib/site';
 import type { Property } from '@/lib/types';
 import { formatArea, formatLocation, formatPrice, specLine } from '@/lib/format';
 import { Badge } from '@/components/ui/Badge';
@@ -77,8 +78,20 @@ export function PropertyCard({ property: p, priority, index = 0 }: Props) {
             </li>
           )}
         </ul>
-        <div className="relative z-10 pt-1">
+        {/* Outside the title <Link>, so no anchor is nested inside another. */}
+        <div className="relative z-10 flex flex-wrap gap-2 pt-1">
           <InterestButton propertyId={p.id} available={!unavailable} />
+          {!unavailable && (
+            <a
+              href={listingWhatsappLink(p)}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={`WhatsApp us about ${p.title}`}
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-line-strong bg-raised px-4 font-medium transition-colors duration-150 hover:border-ink"
+            >
+              <MessageCircle size={18} aria-hidden /> WhatsApp
+            </a>
+          )}
         </div>
       </div>
       <span

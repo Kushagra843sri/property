@@ -11,23 +11,30 @@ const phone = z
 const email = z.string().trim().max(254).email('Enter a valid email address');
 const name = z.string().trim().min(2, 'Enter your full name').max(100, 'That name is too long');
 
+/** Matches the server floor (SECURITY.md); the server also rejects common/related passwords. */
+export const PASSWORD_MIN = 8;
+const newPassword = z
+  .string()
+  .min(PASSWORD_MIN, `Use at least ${PASSWORD_MIN} characters`)
+  .max(200, 'That password is too long');
+
 export const signupSchema = z.object({
   name,
   email,
   phone,
+  password: newPassword,
   consent: z.boolean().refine((v) => v, { message: 'Please tick the box to continue' }),
 });
 
 export const loginSchema = z.object({
-  identifier: z
-    .string()
-    .trim()
-    .min(3, 'Enter your email or phone number')
-    .max(254)
-    .refine((v) => (v.includes('@') ? email.safeParse(v).success : phone.safeParse(v).success), {
-      message: 'Enter a valid email or phone number',
-    }),
+  email,
+  password: z.string().min(1, 'Enter your password').max(200),
 });
+
+/** "Forgot password": the new password is held in memory and sent together with the emailed code. */
+export const forgotSchema = z.object({ email, password: newPassword });
+
+export const phoneSchema = z.object({ phone });
 
 export const codeSchema = z.object({
   code: z.string().regex(/^\d{6}$/, 'Enter the 6-digit code'),

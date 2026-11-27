@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/Badge';
 import { LinkButton } from '@/components/ui/Button';
 import { ApiError, serverGet } from '@/lib/api';
 import { formatArea, formatLocation, formatPrice, specLine } from '@/lib/format';
-import { SITE, whatsappLink } from '@/lib/site';
+import { SITE, listingWhatsappLink } from '@/lib/site';
 import type { Property } from '@/lib/types';
 
 type Params = Promise<{ slug: string }>;
@@ -181,6 +181,25 @@ export default async function PropertyPage({ params }: { params: Params }) {
             </section>
           )}
 
+          {p.videoUrl && (
+            <section aria-labelledby="video" className="mt-10">
+              <h2 id="video" className="mb-3 text-[length:var(--text-xl)]">
+                Video tour
+              </h2>
+              <div className="aspect-video overflow-hidden rounded-lg border border-line bg-black">
+                <iframe
+                  title={`Video tour of ${p.title}`}
+                  src={p.videoUrl}
+                  loading="lazy"
+                  allow="accelerometer; gyroscope; encrypted-media; picture-in-picture"
+                  allowFullScreen
+                  referrerPolicy="no-referrer-when-downgrade"
+                  className="size-full"
+                />
+              </div>
+            </section>
+          )}
+
           {hasGeo && (
             <section aria-labelledby="location" className="mt-10">
               <h2 id="location" className="mb-3 text-[length:var(--text-xl)]">
@@ -232,9 +251,7 @@ export default async function PropertyPage({ params }: { params: Params }) {
                 <Phone size={18} aria-hidden /> Call {SITE.phone}
               </LinkButton>
               <LinkButton
-                href={whatsappLink(
-                  `Hello, I am interested in "${p.title}" (${SITE.url}/listings/${p.slug}).`,
-                )}
+                href={listingWhatsappLink(p)}
                 variant="secondary"
                 size="lg"
                 className="w-full"

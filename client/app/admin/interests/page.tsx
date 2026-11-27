@@ -9,7 +9,7 @@ interface Row {
   id: string;
   createdAt: string;
   notified: boolean;
-  user?: { id: string; name: string; email: string; phone: string; status: string };
+  user?: { id: string; name: string; email: string; phone: string | null; status: string };
   property?: { id: string; title: string; slug: string };
 }
 
@@ -46,12 +46,16 @@ export default function InterestsAdmin() {
                     <>
                       <span className="font-medium">{r.user.name}</span>
                       <br />
-                      <a
-                        href={`tel:${r.user.phone}`}
-                        className="text-sm text-muted hover:underline"
-                      >
-                        {r.user.phone}
-                      </a>
+                      {r.user.phone ? (
+                        <a
+                          href={`tel:${r.user.phone}`}
+                          className="text-sm text-muted hover:underline"
+                        >
+                          {r.user.phone}
+                        </a>
+                      ) : (
+                        <span className="text-sm text-muted">No phone yet</span>
+                      )}
                     </>
                   ) : (
                     <span className="text-muted">Deleted account</span>

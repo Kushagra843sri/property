@@ -2,6 +2,9 @@ import type { Page } from '@playwright/test';
 
 const OUTBOX = 'http://127.0.0.1:4001/outbox';
 
+/** Password used by every E2E visitor (the emailed code is still what verifies the account). */
+export const PASSWORD = 'e2e visitor passphrase 1';
+
 let n = 0;
 /** A unique person per call, so tests never collide in the shared in-memory database. */
 export function newPerson() {
@@ -32,8 +35,9 @@ export async function signUp(page: Page, person: ReturnType<typeof newPerson>) {
   await dialog.getByLabel('Full name').fill(person.name);
   await dialog.getByLabel('Email', { exact: true }).fill(person.email);
   await dialog.getByLabel('Phone', { exact: true }).fill(person.phone);
+  await dialog.getByLabel('Password', { exact: true }).fill(PASSWORD);
   await dialog.getByRole('checkbox').check();
-  await dialog.getByRole('button', { name: 'Send me a code' }).click();
+  await dialog.getByRole('button', { name: 'Create account' }).click();
   await dialog.getByLabel('6-digit code').fill(await latestCode(person.email));
   await dialog.getByRole('button', { name: 'Verify and continue' }).click();
 }

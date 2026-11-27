@@ -168,7 +168,8 @@ function Profile({ user }: { user: User }) {
       <div className="flex flex-col gap-1.5">
         <span className="text-sm font-medium">Email and phone</span>
         <p className="min-h-11 rounded-md bg-sunken px-3.5 py-2.5 text-muted">
-          {user.email}, {user.phone}
+          {user.email}
+          {user.phone ? `, ${user.phone}` : ''}
         </p>
       </div>
       <Button
