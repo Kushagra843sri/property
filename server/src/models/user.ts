@@ -16,11 +16,14 @@ const userSchema = new Schema(
       trim: true,
       maxlength: 254,
     },
-    phone: { type: String, required: true, unique: true, trim: true, maxlength: 16 }, // E.164
+    // E.164. Optional (Google sign-ups add it later); never store '' so the partial index below holds.
+    phone: { type: String, trim: true, maxlength: 16 },
     role: { type: String, enum: ROLES, default: 'user', index: true },
-    passwordHash: { type: String, select: false }, // admin only
+    // argon2id. Admins: set by CLI. Users: set only after they prove they own the email (OTP).
+    passwordHash: { type: String, select: false },
+    googleSub: { type: String, select: false }, // Google account id, set on Google sign-in
     emailVerified: { type: Boolean, default: false },
-    phoneVerified: { type: Boolean, default: false },
+    phoneVerified: { type: Boolean, default: false }, // unused: phones are collected, not verified
     consent: {
       given: { type: Boolean, default: false },
       at: Date,
@@ -42,6 +45,15 @@ const userSchema = new Schema(
 );
 
 userSchema.index({ createdAt: -1 });
+// Unique only where present, so many users can have no phone / no Google account.
+userSchema.index(
+  { phone: 1 },
+  { unique: true, partialFilterExpression: { phone: { $type: 'string' } } },
+);
+userSchema.index(
+  { googleSub: 1 },
+  { unique: true, partialFilterExpression: { googleSub: { $type: 'string' } } },
+);
 
 export type UserDoc = InferSchemaType<typeof userSchema>;
 export const User = model('User', userSchema);

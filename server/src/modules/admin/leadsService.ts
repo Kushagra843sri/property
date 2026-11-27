@@ -14,7 +14,7 @@ type LeanUser = {
   _id: unknown;
   name: string;
   email: string;
-  phone: string;
+  phone?: string | null;
   emailVerified: boolean;
   phoneVerified: boolean;
   status: string;
@@ -27,7 +27,7 @@ const leadUser = (u: LeanUser) => ({
   id: String(u._id),
   name: u.name,
   email: u.email,
-  phone: u.phone,
+  phone: u.phone ?? null,
   emailVerified: u.emailVerified,
   phoneVerified: u.phoneVerified,
   status: u.status,
@@ -130,7 +130,7 @@ export async function listInterests(q: {
         id: String(u._id),
         name: u.name,
         email: u.email,
-        phone: u.phone,
+        phone: u.phone ?? null,
         status: u.status,
         leadStatus: u.leadStatus,
       },
@@ -203,7 +203,7 @@ export async function* leadsCsv(): AsyncGenerator<string> {
     yield csvRow([
       u.name,
       u.email,
-      u.phone,
+      u.phone ?? '',
       u.leadStatus,
       byUser.get(String(u._id)) ?? 0,
       u.consent?.at,

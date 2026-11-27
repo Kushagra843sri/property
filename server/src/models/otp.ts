@@ -2,8 +2,8 @@ import { Schema, model } from 'mongoose';
 
 // Implementation detail of the approved OTP design (hashed at rest, expiring, attempt-limited).
 const otpSchema = new Schema({
-  identifier: { type: String, required: true, unique: true }, // normalized email or E.164 phone
-  channel: { type: String, enum: ['email', 'phone'], required: true },
+  identifier: { type: String, required: true, unique: true }, // normalized email
+  channel: { type: String, enum: ['email'], default: 'email' },
   codeHash: { type: String, required: true },
   attempts: { type: Number, default: 0 },
   lastSentAt: { type: Date, default: Date.now },

@@ -1,5 +1,5 @@
 import argon2 from 'argon2';
-import { ADMIN_PASSWORD_MIN } from '../config/constants.js';
+import { ADMIN_PASSWORD_MIN, USER_PASSWORD_MIN } from '../config/constants.js';
 
 // A short denylist of the most common passwords; the length floor does the rest.
 const COMMON = new Set([
@@ -17,10 +17,8 @@ const COMMON = new Set([
   'passw0rd1234',
 ]);
 
-/** Returns an error message, or null when the password is acceptable. */
-export function passwordProblem(pw: string, ...related: string[]): string | null {
-  if (pw.length < ADMIN_PASSWORD_MIN)
-    return `Password must be at least ${ADMIN_PASSWORD_MIN} characters`;
+function check(min: number, pw: string, related: string[]): string | null {
+  if (pw.length < min) return `Password must be at least ${min} characters`;
   if (pw.length > 200) return 'Password too long';
   const lower = pw.toLowerCase();
   if (COMMON.has(lower) || /^(.)\1+$/.test(pw)) return 'Password is too common';
@@ -28,6 +26,14 @@ export function passwordProblem(pw: string, ...related: string[]): string | null
     return 'Password must not contain your name or email';
   return null;
 }
+
+/** Returns an error message, or null when the (admin) password is acceptable. */
+export const passwordProblem = (pw: string, ...related: string[]) =>
+  check(ADMIN_PASSWORD_MIN, pw, related);
+
+/** Same rules with the shorter end-user minimum. */
+export const userPasswordProblem = (pw: string, ...related: string[]) =>
+  check(USER_PASSWORD_MIN, pw, related);
 
 const OPTS = { type: argon2.argon2id } as const;
 export const hashPassword = (pw: string) => argon2.hash(pw, OPTS);

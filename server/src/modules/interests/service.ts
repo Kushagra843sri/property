@@ -4,7 +4,7 @@ import { Property } from '../../models/property.js';
 import { User } from '../../models/user.js';
 import { AppError } from '../../utils/errors.js';
 import { pageMeta } from '../../utils/pagination.js';
-import { listingUrl, notifyDealer } from '../notifications/service.js';
+import { listingUrl, notifyDealer, notifyUser, whatsappUrl } from '../notifications/service.js';
 import { toPublic } from '../properties/service.js';
 
 /**
@@ -20,6 +20,8 @@ export async function addInterest(userId: string, propertyId: string) {
   if (!property) throw AppError.notFound('Property not found');
   if (user.status !== 'active' || !user.consent?.given)
     throw AppError.forbidden('Consent to be contacted is required');
+  // Google sign-ups have no phone yet; the dealer needs one to follow up.
+  if (!user.phone) throw new AppError(400, 'phone_required', 'Please add your phone number first');
   if (property.status !== 'available') throw AppError.conflict('Property is no longer available');
 
   const res = await Interest.updateOne(
@@ -37,11 +39,22 @@ export async function addInterest(userId: string, propertyId: string) {
         '',
         `Name: ${user.name}`,
         `Phone: ${user.phone}`,
+        `WhatsApp: ${whatsappUrl(user.phone)}`,
         `Email: ${user.email}`,
         `Listing: ${listingUrl(property.slug)}`,
       ].join('\n'),
     );
     if (sent) await Interest.updateOne({ _id: res.upsertedId }, { $set: { notified: true } });
+    await notifyUser(
+      user.email,
+      `We received your interest: ${property.title}`,
+      [
+        `Hello ${user.name},`,
+        '',
+        `Thank you for your interest in "${property.title}". We will contact you soon.`,
+        `Listing: ${listingUrl(property.slug)}`,
+      ].join('\n'),
+    );
   }
   return { interested: true, created };
 }

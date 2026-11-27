@@ -14,6 +14,9 @@ export const OTP_RESEND_COOLDOWN_MS = 60 * 1000;
 export const CONSENT_VERSION = '2025-01';
 
 export const MAX_IMAGES_PER_PROPERTY = 20;
+/** Only Bunny Stream player links may be embedded on a listing (stops arbitrary iframes). */
+export const VIDEO_URL_PATTERN =
+  /^https:\/\/(?:iframe|player)\.mediadelivery\.net\/(?:embed|play)\/\d+\/[0-9a-f-]{36}(?:\?[\w=&.%-]*)?$/;
 export const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 export const ALLOWED_IMAGE_MIME = ['image/jpeg', 'image/png', 'image/webp'] as const;
 
@@ -23,3 +26,4 @@ export const COOKIE_CSRF = 'csrf_token';
 export const HEADER_CSRF = 'x-csrf-token';
 
 export const ADMIN_PASSWORD_MIN = 12;
+export const USER_PASSWORD_MIN = 8; // SECURITY.md floor for end users

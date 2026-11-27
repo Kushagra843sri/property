@@ -13,6 +13,8 @@ import {
 import { User } from '../src/models/user.js';
 import { Otp } from '../src/models/otp.js';
 import { RefreshToken } from '../src/models/refreshToken.js';
+import { env } from '../src/config/env.js';
+import { setGoogleVerifier, type GoogleIdentity } from '../src/providers/google.js';
 import { outbox } from '../src/providers/mailer.js';
 import { hashOtp } from '../src/utils/otp.js';
 import { OTP_MAX_ATTEMPTS } from '../src/config/constants.js';
@@ -133,16 +135,19 @@ describe('otp', () => {
     expect(rec?.codeHash).toBe(hashOtp(u.email, code));
   });
 
-  it('works over the phone channel', async () => {
-    const { smsOutbox } = await import('../src/providers/sms.js');
+  it('only supports email: a phone number is not a valid identifier any more', async () => {
     const u = uniqueUser();
     await request(app)
       .post(`${A}/signup`)
-      .send({ ...u, consent: true, channel: 'phone' });
-    const code = smsOutbox.at(-1)!.body.match(/(\d{6})/)![1];
-    const res = await request(app).post(`${A}/otp/verify`).send({ identifier: u.phone, code });
-    expect(res.status).toBe(200);
-    expect(res.body.data.user.phoneVerified).toBe(true);
+      .send({ ...u, consent: true });
+    const res = await request(app)
+      .post(`${A}/otp/verify`)
+      .send({ identifier: u.phone, code: '123456' });
+    expect(res.status).toBe(400);
+    const channel = await request(app)
+      .post(`${A}/signup`)
+      .send({ ...uniqueUser(), consent: true, channel: 'phone' });
+    expect(channel.status).toBe(400); // unknown field
   });
 
   it('rejects a wrong code and a replayed code with one generic message', async () => {
@@ -232,6 +237,268 @@ describe('otp', () => {
       last = r.status;
     }
     expect(last).toBe(429);
+  });
+});
+
+const STRONG = 'correct horse battery 42';
+
+/** Signs up and verifies the emailed code in one go, optionally setting a password. */
+async function signUpWithPassword(password: string | undefined = STRONG) {
+  const u = uniqueUser();
+  await request(app)
+    .post(`${A}/signup`)
+    .send({ ...u, consent: true });
+  const s = makeSession();
+  const res = await s.post(`${A}/otp/verify`, {
+    identifier: u.email,
+    code: otpFor(u.email),
+    ...(password ? { password } : {}),
+  });
+  return { u, res, s };
+}
+
+describe('password sign-in', () => {
+  it('stores the password only once the emailed code is verified, then logs in with it', async () => {
+    const { u, res } = await signUpWithPassword();
+    expect(res.status).toBe(200);
+    expect(JSON.stringify(res.body)).not.toMatch(/passwordHash|argon2/);
+    const hash = (await User.findOne({ email: u.email }).select('+passwordHash'))?.passwordHash;
+    expect(hash).toMatch(/^\$argon2id\$/);
+
+    const s = makeSession();
+    const login = await s.post(`${A}/login`, { email: u.email, password: STRONG });
+    expect(login.status).toBe(200);
+    expect(login.body.data.user).toMatchObject({
+      email: u.email,
+      role: 'user',
+      emailVerified: true,
+    });
+    expect((await s.get(`${A}/me`)).status).toBe(200);
+  });
+
+  it('cannot be pre-claimed: signing up with someone else’s email sets no password', async () => {
+    const victim = uniqueUser();
+    await request(app)
+      .post(`${A}/signup`)
+      .send({ ...victim, consent: true });
+    // The attacker never sees the code, so no password can be stored and no login works.
+    const doc = await User.findOne({ email: victim.email }).select('+passwordHash');
+    expect(doc?.passwordHash).toBeUndefined();
+    const r = await request(app)
+      .post(`${A}/login`)
+      .send({ email: victim.email, password: 'attacker chosen pass 1' });
+    expect(r.status).toBe(401);
+  });
+
+  it('does not set the password when the code is wrong', async () => {
+    const u = uniqueUser();
+    await request(app)
+      .post(`${A}/signup`)
+      .send({ ...u, consent: true });
+    const code = otpFor(u.email)!;
+    const wrong = code === '000000' ? '111111' : '000000';
+    const r = await request(app)
+      .post(`${A}/otp/verify`)
+      .send({ identifier: u.email, code: wrong, password: STRONG });
+    expect(r.status).toBe(400);
+    expect(
+      (await User.findOne({ email: u.email }).select('+passwordHash'))?.passwordHash,
+    ).toBeUndefined();
+  });
+
+  it('rejects a weak password without spending the code', async () => {
+    const u = uniqueUser();
+    await request(app)
+      .post(`${A}/signup`)
+      .send({ ...u, consent: true });
+    const code = otpFor(u.email)!;
+    for (const password of ['short', 'password123', u.email.split('@')[0]! + '12345']) {
+      const r = await request(app)
+        .post(`${A}/otp/verify`)
+        .send({ identifier: u.email, code, password });
+      expect(r.status).toBe(400);
+    }
+    const ok = await request(app)
+      .post(`${A}/otp/verify`)
+      .send({ identifier: u.email, code, password: STRONG });
+    expect(ok.status).toBe(200); // the same code still works
+  });
+
+  it('gives one generic failure for wrong password, unknown email, passwordless and admin accounts', async () => {
+    const { u } = await signUpWithPassword();
+    const passwordless = await signUpAndLogin(); // verified by code only, no password
+    const admin = await createAdmin();
+    const attempts = [
+      { email: u.email, password: 'wrong password 123' },
+      { email: 'nobody@example.com', password: STRONG },
+      { email: passwordless.user.email, password: STRONG },
+      { email: admin.email, password: admin.password },
+    ];
+    const messages = new Set<string>();
+    for (const a of attempts) {
+      const r = await request(app).post(`${A}/login`).send(a);
+      expect(r.status).toBe(401);
+      messages.add(r.body.error.message);
+    }
+    expect(messages.size).toBe(1);
+  });
+
+  it('lets a user reset a forgotten password with an emailed code', async () => {
+    const { u } = await signUpWithPassword();
+    outbox.length = 0;
+    await Otp.deleteMany({});
+    await request(app).post(`${A}/otp/request`).send({ identifier: u.email });
+    const reset = await request(app)
+      .post(`${A}/otp/verify`)
+      .send({ identifier: u.email, code: otpFor(u.email), password: 'brand new passphrase 9' });
+    expect(reset.status).toBe(200);
+    const old = await request(app).post(`${A}/login`).send({ email: u.email, password: STRONG });
+    expect(old.status).toBe(401);
+    const fresh = await request(app)
+      .post(`${A}/login`)
+      .send({ email: u.email, password: 'brand new passphrase 9' });
+    expect(fresh.status).toBe(200);
+  });
+
+  it('rate limits password login and validates the body', async () => {
+    expect(
+      (await request(app).post(`${A}/login`).send({ email: 'nope', password: 'x' })).status,
+    ).toBe(400);
+    expect((await request(app).post(`${A}/login`).send({ email: 'a@b.co' })).status).toBe(400);
+    let last = 0;
+    for (let i = 0; i < 12; i++) {
+      const r = await request(app)
+        .post(`${A}/login`)
+        .set('x-test-rate-limit', '1')
+        .send({ email: 'a@b.co', password: 'x' });
+      last = r.status;
+    }
+    expect(last).toBe(429);
+  });
+});
+
+const googleUser = (over: Partial<GoogleIdentity> = {}): GoogleIdentity => ({
+  sub: 'sub-1',
+  email: 'gina@example.com',
+  emailVerified: true,
+  name: 'Gina Google',
+  ...over,
+});
+const fakeGoogle = (id: GoogleIdentity | null) => setGoogleVerifier(async () => id);
+const CRED = 'x'.repeat(40);
+
+describe('google sign-in', () => {
+  it('creates a verified account (no phone) when the user consents, and starts a session', async () => {
+    fakeGoogle(googleUser());
+    const s = makeSession();
+    const res = await s.post(`${A}/google`, { credential: CRED, consent: true });
+    expect(res.status).toBe(200);
+    expect(res.body.data.user).toMatchObject({
+      email: 'gina@example.com',
+      name: 'Gina Google',
+      role: 'user',
+      emailVerified: true,
+      phone: null,
+    });
+    const doc = await User.findOne({ email: 'gina@example.com' }).select('+googleSub');
+    expect(doc?.googleSub).toBe('sub-1');
+    expect(doc?.consent?.given).toBe(true);
+    expect((await s.get(`${A}/me`)).status).toBe(200);
+  });
+
+  it('refuses to create an account without explicit consent', async () => {
+    fakeGoogle(googleUser());
+    for (const consent of [undefined, false]) {
+      const res = await request(app)
+        .post(`${A}/google`)
+        .send({ credential: CRED, ...(consent === undefined ? {} : { consent }) });
+      expect(res.status).toBe(400);
+      expect(res.body.error.code).toBe('consent_required');
+    }
+    expect(await User.countDocuments()).toBe(0);
+  });
+
+  it('signs an existing user in (matched by email) and marks the email verified', async () => {
+    const u = uniqueUser();
+    await request(app)
+      .post(`${A}/signup`)
+      .send({ ...u, consent: true }); // unverified so far
+    fakeGoogle(googleUser({ email: u.email, sub: 'sub-existing' }));
+    const res = await request(app).post(`${A}/google`).send({ credential: CRED });
+    expect(res.status).toBe(200);
+    expect(await User.countDocuments()).toBe(1);
+    const doc = await User.findOne({ email: u.email }).select('+googleSub');
+    expect(doc).toMatchObject({ emailVerified: true, googleSub: 'sub-existing', phone: u.phone });
+  });
+
+  it('never links to or signs in an admin account', async () => {
+    const admin = await createAdmin();
+    fakeGoogle(googleUser({ email: admin.email, sub: 'sub-admin' }));
+    const res = await request(app).post(`${A}/google`).send({ credential: CRED, consent: true });
+    expect(res.status).toBe(401);
+    expect(
+      (await User.findOne({ email: admin.email }).select('+googleSub'))?.googleSub,
+    ).toBeUndefined();
+  });
+
+  it('refuses an invalid token, an unverified Google email, and a different Google account for the same email', async () => {
+    fakeGoogle(null);
+    expect(
+      (await request(app).post(`${A}/google`).send({ credential: CRED, consent: true })).status,
+    ).toBe(401);
+    fakeGoogle(googleUser({ emailVerified: false }));
+    expect(
+      (await request(app).post(`${A}/google`).send({ credential: CRED, consent: true })).status,
+    ).toBe(401);
+    expect(await User.countDocuments()).toBe(0);
+
+    fakeGoogle(googleUser());
+    await request(app).post(`${A}/google`).send({ credential: CRED, consent: true });
+    fakeGoogle(googleUser({ sub: 'someone-else' }));
+    expect(
+      (await request(app).post(`${A}/google`).send({ credential: CRED, consent: true })).status,
+    ).toBe(401);
+  });
+
+  it('allows many Google users who have no phone number', async () => {
+    for (const n of [1, 2, 3]) {
+      fakeGoogle(googleUser({ sub: `s${n}`, email: `g${n}@example.com` }));
+      const r = await request(app).post(`${A}/google`).send({ credential: CRED, consent: true });
+      expect(r.status).toBe(200);
+    }
+    expect(await User.countDocuments()).toBe(3);
+  });
+
+  it('is cleanly unavailable when no client ID is configured, and validates the body', async () => {
+    expect((await request(app).post(`${A}/google`).send({ credential: 'short' })).status).toBe(400);
+    const saved = env.GOOGLE_CLIENT_ID;
+    env.GOOGLE_CLIENT_ID = undefined;
+    try {
+      const r = await request(app).post(`${A}/google`).send({ credential: CRED, consent: true });
+      expect(r.status).toBe(503);
+    } finally {
+      env.GOOGLE_CLIENT_ID = saved;
+    }
+  });
+});
+
+describe('own phone number', () => {
+  it('adds a normalized phone to a Google account, and refuses duplicates and bad numbers', async () => {
+    fakeGoogle(googleUser());
+    const s = makeSession();
+    await s.post(`${A}/google`, { credential: CRED, consent: true });
+    const ok = await s.patch('/api/v1/me', { phone: '98765 43210' });
+    expect(ok.status).toBe(200);
+    expect(ok.body.data.user.phone).toBe('+919876543210');
+
+    expect((await s.patch('/api/v1/me', { phone: '12' })).status).toBe(400);
+
+    fakeGoogle(googleUser({ sub: 'sub-2', email: 'second@example.com' }));
+    const s2 = makeSession();
+    await s2.post(`${A}/google`, { credential: CRED, consent: true });
+    const dup = await s2.patch('/api/v1/me', { phone: '+919876543210' });
+    expect(dup.status).toBe(409);
+    expect(JSON.stringify(dup.body)).not.toMatch(/gina/i); // says nothing about the other owner
   });
 });
 

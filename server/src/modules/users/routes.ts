@@ -10,6 +10,7 @@ import { AppError } from '../../utils/errors.js';
 import { logger } from '../../utils/logger.js';
 import { paginationShape } from '../../utils/pagination.js';
 import { publicUser } from '../auth/controller.js';
+import { phone } from '../auth/schema.js';
 import { clearSessionCookies } from '../auth/tokens.js';
 import { listMyInterests } from '../interests/service.js';
 
@@ -17,9 +18,15 @@ export const meRouter = Router();
 meRouter.use(requireAuth);
 
 const patchBody = z
-  .object({ name: z.string().trim().min(2).max(100).optional(), consent: z.boolean().optional() })
+  .object({
+    name: z.string().trim().min(2).max(100).optional(),
+    consent: z.boolean().optional(),
+    phone: phone.optional(), // collected, not verified; Google sign-ups add it before showing interest
+  })
   .strict()
-  .refine((b) => b.name !== undefined || b.consent !== undefined, { message: 'Nothing to update' });
+  .refine((b) => b.name !== undefined || b.consent !== undefined || b.phone !== undefined, {
+    message: 'Nothing to update',
+  });
 
 meRouter.get(
   '/interests',
@@ -46,6 +53,7 @@ meRouter.patch('/', validate({ body: patchBody }), async (req, res) => {
   const b = req.validated.body as z.infer<typeof patchBody>;
   const set: Record<string, unknown> = {};
   if (b.name !== undefined) set.name = b.name;
+  if (b.phone !== undefined) set.phone = b.phone;
   if (b.consent === false) {
     set.status = 'withdrawn';
     set['consent.given'] = false;
@@ -60,7 +68,12 @@ meRouter.patch('/', validate({ body: patchBody }), async (req, res) => {
     req.auth!.userId,
     { $set: set },
     { returnDocument: 'after' },
-  );
+  ).catch((err: unknown) => {
+    // Unique phone index: say nothing about who owns the number.
+    if ((err as { code?: number }).code === 11000)
+      throw AppError.conflict('That phone number cannot be used');
+    throw err;
+  });
   if (!user) throw AppError.unauthorized();
   logger.info({ userId: String(user._id), consent: b.consent }, 'profile updated');
   res.json({ data: { user: publicUser(user) } });

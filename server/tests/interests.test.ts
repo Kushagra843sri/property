@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import request from 'supertest';
-import { app, makeProperty, signUpAndLogin, useTestDb } from './helpers.js';
+import { app, makeProperty, makeSession, signUpAndLogin, useTestDb } from './helpers.js';
+import { setGoogleVerifier } from '../src/providers/google.js';
 import { Interest } from '../src/models/interest.js';
 import { User } from '../src/models/user.js';
 import { outbox, setMailer, getMailer } from '../src/providers/mailer.js';
@@ -29,7 +30,43 @@ describe('interests', () => {
     expect(mail.text).toContain(user.email);
     expect(mail.text).toContain(user.phone);
     expect(mail.text).toContain(`/listings/${p.slug}`);
+    expect(mail.text).toContain(`https://wa.me/${user.phone.replace('+', '')}`);
     expect((await Interest.findOne())?.notified).toBe(true);
+  });
+
+  it('sends the user a confirmation email, once', async () => {
+    const { session, user } = await signUpAndLogin();
+    const p = await makeProperty({ title: 'Lake View' });
+    outbox.length = 0;
+    await session.post(url(p._id));
+    await session.post(url(p._id)); // repeat click
+    const mine = outbox.filter((m) => m.to === user.email);
+    expect(mine).toHaveLength(1);
+    expect(mine[0]!.subject).toContain('Lake View');
+    expect(mine[0]!.text).toContain(`/listings/${p.slug}`);
+  });
+
+  it('asks for a phone number first when the account has none (Google sign-up), then works', async () => {
+    setGoogleVerifier(async () => ({
+      sub: 'g-1',
+      email: 'nophone@example.com',
+      emailVerified: true,
+      name: 'No Phone',
+    }));
+    const session = makeSession();
+    await session.post('/api/v1/auth/google', { credential: 'x'.repeat(40), consent: true });
+    const p = await makeProperty();
+    outbox.length = 0;
+
+    const blocked = await session.post(url(p._id));
+    expect(blocked.status).toBe(400);
+    expect(blocked.body.error.code).toBe('phone_required');
+    expect(await Interest.countDocuments()).toBe(0);
+    expect(outbox).toHaveLength(0);
+
+    expect((await session.patch('/api/v1/me', { phone: '9876543210' })).status).toBe(200);
+    expect((await session.post(url(p._id))).status).toBe(200);
+    expect(outbox.find((m) => m.to === 'dealer@example.com')?.text).toContain('+919876543210');
   });
 
   it('is idempotent: repeats do not duplicate or re-notify, even when concurrent', async () => {

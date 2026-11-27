@@ -33,10 +33,8 @@ const schema = z
     MAIL_FROM: z.string().optional(),
     DEALER_NOTIFY_EMAIL: z.string().email().optional(),
 
-    SMS_PROVIDER: z.enum(['console', 'twilio']).default('console'),
-    TWILIO_ACCOUNT_SID: z.string().optional(),
-    TWILIO_AUTH_TOKEN: z.string().optional(),
-    TWILIO_FROM: z.string().optional(),
+    // Optional: when unset, Google sign-in is simply unavailable (never a startup failure).
+    GOOGLE_CLIENT_ID: z.string().min(1).optional(),
 
     IMAGE_PROVIDER: z.enum(['mock', 'cloudinary']).default('mock'),
     CLOUDINARY_CLOUD_NAME: z.string().optional(),
@@ -52,10 +50,6 @@ const schema = z
       need(!!env.RESEND_API_KEY, 'RESEND_API_KEY', 'required when MAIL_PROVIDER=resend');
       need(!!env.MAIL_FROM, 'MAIL_FROM', 'required when MAIL_PROVIDER=resend');
     }
-    if (env.SMS_PROVIDER === 'twilio') {
-      for (const k of ['TWILIO_ACCOUNT_SID', 'TWILIO_AUTH_TOKEN', 'TWILIO_FROM'] as const)
-        need(!!env[k], k, 'required when SMS_PROVIDER=twilio');
-    }
     if (env.IMAGE_PROVIDER === 'cloudinary') {
       for (const k of [
         'CLOUDINARY_CLOUD_NAME',
@@ -69,11 +63,6 @@ const schema = z
         env.MAIL_PROVIDER !== 'console',
         'MAIL_PROVIDER',
         'console mailer is forbidden in production',
-      );
-      need(
-        env.SMS_PROVIDER !== 'console',
-        'SMS_PROVIDER',
-        'console SMS is forbidden in production',
       );
       need(
         env.IMAGE_PROVIDER !== 'mock',

@@ -4,7 +4,7 @@
  *
  *   npm run dev:memory
  *
- * DEVELOPMENT ONLY. It forces NODE_ENV=development with the console mail/SMS adapters and refuses to
+ * DEVELOPMENT ONLY. It forces NODE_ENV=development with the console mail adapter and refuses to
  * run otherwise. The outbox endpoint exposes OTPs, so it binds to 127.0.0.1 and never ships.
  */
 import { createServer } from 'node:http';
@@ -26,7 +26,6 @@ Object.assign(process.env, {
   JWT_ACCESS_SECRET: randomBytes(32).toString('hex'),
   JWT_REFRESH_SECRET: randomBytes(32).toString('hex'),
   MAIL_PROVIDER: 'console',
-  SMS_PROVIDER: 'console',
   IMAGE_PROVIDER: 'mock',
   DEALER_NOTIFY_EMAIL: 'dealer@example.com',
 });
@@ -38,7 +37,6 @@ const { createApp } = await import('../src/app.js');
 const { connectDb } = await import('../src/config/db.js');
 const { runSeed } = await import('../src/seed.js');
 const { outbox } = await import('../src/providers/mailer.js');
-const { smsOutbox } = await import('../src/providers/sms.js');
 
 await connectDb();
 await runSeed(ADMIN_EMAIL, ADMIN_PASSWORD);
@@ -52,7 +50,7 @@ createApp().listen(port, () => {
 createServer((req, res) => {
   res.setHeader('Content-Type', 'application/json');
   res.setHeader('Access-Control-Allow-Origin', '*');
-  if (req.url === '/outbox') return void res.end(JSON.stringify({ mail: outbox, sms: smsOutbox }));
+  if (req.url === '/outbox') return void res.end(JSON.stringify({ mail: outbox }));
   res.statusCode = 404;
   res.end('{}');
 }).listen(port + 1, '127.0.0.1', () =>

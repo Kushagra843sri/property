@@ -88,7 +88,7 @@ describe('env validation', () => {
 
   it('refuses dev fallbacks in production', () => {
     expect(() => parseEnv({ ...base, NODE_ENV: 'production' })).toThrow(
-      /MAIL_PROVIDER[\s\S]*SMS_PROVIDER[\s\S]*IMAGE_PROVIDER/,
+      /MAIL_PROVIDER[\s\S]*IMAGE_PROVIDER/,
     );
   });
 
@@ -101,10 +101,6 @@ describe('env validation', () => {
       RESEND_API_KEY: 'k',
       MAIL_FROM: 'a@b.co',
       DEALER_NOTIFY_EMAIL: 'dealer@b.co',
-      SMS_PROVIDER: 'twilio',
-      TWILIO_ACCOUNT_SID: 's',
-      TWILIO_AUTH_TOKEN: 't',
-      TWILIO_FROM: '+15550000000',
       IMAGE_PROVIDER: 'cloudinary',
       CLOUDINARY_CLOUD_NAME: 'c',
       CLOUDINARY_API_KEY: 'k',

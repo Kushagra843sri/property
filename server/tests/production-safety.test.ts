@@ -14,10 +14,6 @@ const base = {
   MAIL_PROVIDER: 'resend',
   RESEND_API_KEY: 'k',
   MAIL_FROM: 'a@shop.in',
-  SMS_PROVIDER: 'twilio',
-  TWILIO_ACCOUNT_SID: 's',
-  TWILIO_AUTH_TOKEN: 't',
-  TWILIO_FROM: '+1',
   IMAGE_PROVIDER: 'cloudinary',
   CLOUDINARY_CLOUD_NAME: 'c',
   CLOUDINARY_API_KEY: 'k',
@@ -31,10 +27,17 @@ describe('production safety', () => {
 
   it.each([
     ['MAIL_PROVIDER', 'console'],
-    ['SMS_PROVIDER', 'console'],
     ['IMAGE_PROVIDER', 'mock'],
   ])('refuses %s=%s in production', (key, value) => {
     expect(() => parseEnv({ ...base, [key]: value })).toThrow(new RegExp(key));
+  });
+
+  it('does not require an SMS provider or a Google client ID in production', () => {
+    const env = parseEnv(base);
+    expect(env.GOOGLE_CLIENT_ID).toBeUndefined();
+    expect(
+      parseEnv({ ...base, GOOGLE_CLIENT_ID: 'x.apps.googleusercontent.com' }).GOOGLE_CLIENT_ID,
+    ).toBe('x.apps.googleusercontent.com');
   });
 
   it('refuses a wildcard CORS origin and a missing proxy hop count in production', () => {

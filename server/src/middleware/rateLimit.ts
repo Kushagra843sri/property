@@ -36,3 +36,4 @@ export const otpLimiter = make(15 * MIN, 10, 'otp');
 export const enquiryLimiter = make(15 * MIN, 5, 'enquiry');
 export const interestLimiter = make(MIN, 10, 'interest');
 export const adminLoginLimiter = make(15 * MIN, 8, 'admin-login');
+export const loginLimiter = make(15 * MIN, 10, 'login'); // user password / Google sign-in
