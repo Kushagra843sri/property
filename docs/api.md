@@ -63,9 +63,9 @@ Revokes the refresh-token family server-side and clears cookies. `200 { data: { 
 
 Auth: any · `200 { data: { user } }`.
 
-### POST /auth/admin/login
+### Admin sign-in
 
-Rate limit: 8 / 15 min · Request: `{ email, password }` → `200 { data: { user } }` · `401 "Invalid credentials"` (generic). Admins are created only by `npm run seed`.
+There is no separate admin login. An admin signs in with `POST /auth/login` (same body and the same generic `401`); the `role` in the returned user is `admin`. Admins are created only by `npm run create-admin` / `npm run seed`, never by sign-up, and Google sign-in and email-code password reset never apply to them.
 
 ## User (auth: user)
 

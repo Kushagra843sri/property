@@ -26,6 +26,7 @@ This site stores **personal data** (names, phone numbers, emails, interests) and
 
 - Roles: `user`, `admin`. Enforce **server-side on every route**; never trust client checks.
 - Admin routes live under `/api/admin/*` behind admin middleware. Admin accounts are created via seed/CLI, **never via public signup**.
+- One sign-in for everyone (owner decision, 2026-11-28): an admin uses the normal email + password form and the session role grants admin access. The shared login limit is strict (8 tries / 15 min / IP), admins are never linked to Google sign-in, and email-code password reset ignores admin accounts.
 - Check ownership on every user-scoped resource (a user can only read/modify their own data).
 - Admin panel: consider 2FA (TOTP) as a phase-2 hardening item; strong password and rate-limit login from day one.
 

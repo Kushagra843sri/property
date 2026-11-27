@@ -9,7 +9,7 @@ test('worst-case listing does not overflow cards or the detail page at 320px', a
   page,
   context,
 }) => {
-  const login = await context.request.post(`${API}/auth/admin/login`, {
+  const login = await context.request.post(`${API}/auth/login`, {
     data: { email: 'admin@example.com', password: 'demo-admin-passphrase-1' },
   });
   expect(login.ok()).toBe(true);

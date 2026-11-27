@@ -41,3 +41,14 @@ export async function signUp(page: Page, person: ReturnType<typeof newPerson>) {
   await dialog.getByLabel('6-digit code').fill(await latestCode(person.email));
   await dialog.getByRole('button', { name: 'Verify and continue' }).click();
 }
+
+/** Admin signs in through the normal Sign in dialog (admins have no separate login). */
+export async function adminSignIn(page: Page) {
+  await page.goto('/admin');
+  await page.getByRole('main').getByRole('button', { name: 'Sign in' }).click();
+  const dialog = page.getByRole('dialog');
+  await dialog.getByLabel('Email', { exact: true }).fill('admin@example.com');
+  await dialog.getByLabel('Password', { exact: true }).fill('demo-admin-passphrase-1');
+  await dialog.getByRole('button', { name: 'Sign in', exact: true }).click();
+  await page.getByRole('heading', { name: 'Dashboard' }).waitFor();
+}

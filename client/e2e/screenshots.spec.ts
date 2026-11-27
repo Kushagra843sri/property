@@ -1,4 +1,5 @@
 import { test } from '@playwright/test';
+import { adminSignIn } from './helpers';
 import path from 'node:path';
 
 // Not an assertion test: captures key pages for docs/screenshots (run with `npm run e2e -- screenshots`).
@@ -56,11 +57,7 @@ for (const [width, height] of [
 ] as const) {
   test(`admin pages @${width}`, async ({ page }) => {
     await page.setViewportSize({ width, height });
-    await page.goto('/admin');
-    await page.getByLabel('Email', { exact: true }).fill('admin@example.com');
-    await page.getByLabel('Password').fill('demo-admin-passphrase-1');
-    await page.getByRole('button', { name: 'Sign in' }).click();
-    await page.getByRole('heading', { name: 'Dashboard' }).waitFor();
+    await adminSignIn(page);
     for (const [name, url] of [
       ['admin-dashboard', '/admin'],
       ['admin-listings', '/admin/listings'],

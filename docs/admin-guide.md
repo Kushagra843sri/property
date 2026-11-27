@@ -4,9 +4,9 @@ This guide explains how to run your website day to day. You do not need any tech
 
 ## Signing in
 
-1. Open your website address and add **/admin** at the end, for example `www.yourshop.in/admin`.
-2. Type your admin **email** and **password**, then press **Sign in**.
-3. You see the **Dashboard**. On the left (or the top, on a phone) are: Dashboard, Listings, Leads, Interests, Enquiries.
+1. Open your website and press **Sign in** at the top right (the same button everyone uses).
+2. Type your admin **email** and **password**, then press **Sign in**. Do not use the Google button; it is not for admin accounts.
+3. You go straight to the **Dashboard**. Later, the **Admin** button in the top bar takes you back to it. On the left (or the top, on a phone) are: Dashboard, Listings, Leads, Interests, Enquiries.
 
 If you forget your password, ask your developer to reset it. Never share your password. After too many wrong tries the site makes you wait a few minutes; this protects you.
 

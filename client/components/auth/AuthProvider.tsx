@@ -9,6 +9,7 @@ import {
   useState,
   type ReactNode,
 } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
 import { ApiError, api } from '@/lib/api';
 import type { User } from '@/lib/types';
 import { AuthDialog } from './AuthDialog';
@@ -57,6 +58,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [ready, setReady] = useState(false);
   const [dialog, setDialog] = useState<OpenOptions | null>(null);
+  const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     let cancelled = false;
@@ -93,6 +96,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           const resume = dialog?.onSuccess;
           setDialog(null);
           resume?.();
+          // An admin who signs in here lands in the admin tools (unless already inside them).
+          if (u.role === 'admin' && !resume && !pathname.startsWith('/admin'))
+            router.push('/admin');
         }}
       />
     </AuthContext.Provider>

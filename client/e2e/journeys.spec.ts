@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { PASSWORD, newPerson, signUp } from './helpers';
+import { PASSWORD, adminSignIn, newPerson, signUp } from './helpers';
 
 test.describe('critical journeys', () => {
   test('1. visitor browses, filters and opens a listing', async ({ page }) => {
@@ -126,11 +126,7 @@ test('3. admin creates a listing with a photo, sees the new lead and interest, u
   const title = `E2E Shop ${Date.now()}`;
 
   // Admin signs in and creates a listing.
-  await page.goto('/admin');
-  await page.getByLabel('Email', { exact: true }).fill('admin@example.com');
-  await page.getByLabel('Password').fill('demo-admin-passphrase-1');
-  await page.getByRole('button', { name: 'Sign in' }).click();
-  await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible();
+  await adminSignIn(page);
 
   await page.goto('/admin/listings/new');
   await page.getByLabel('Title').fill(title);

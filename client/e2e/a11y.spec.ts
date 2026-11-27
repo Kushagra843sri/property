@@ -1,5 +1,6 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
+import { adminSignIn } from './helpers';
 
 const TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa', 'best-practice'];
 
@@ -142,11 +143,8 @@ test.describe('axe: dialogs and keyboard', () => {
 test.describe('axe: admin', () => {
   test('login and pages', async ({ page }) => {
     await page.goto('/admin');
-    await scan(page, 'admin login');
-    await page.getByLabel('Email', { exact: true }).fill('admin@example.com');
-    await page.getByLabel('Password').fill('demo-admin-passphrase-1');
-    await page.getByRole('button', { name: 'Sign in' }).click();
-    await page.getByRole('heading', { name: 'Dashboard' }).waitFor();
+    await scan(page, 'admin sign-in prompt');
+    await adminSignIn(page);
     for (const url of [
       '/admin',
       '/admin/listings',
