@@ -37,6 +37,10 @@ Claude: run the relevant checks yourself and report real output. Never say "test
 3. Admin logs in, creates a listing with images, sees the new interest/lead, updates status, exports CSV
 4. Contact form submission reaches the admin
 
+**Running the browser tests twice in a row:** each run starts a new in-memory API with new listing ids, but Next.js keeps its
+60-second listing cache on disk. A second run can then show listing links from the first run's database (a 404 on open, or
+"Property not found" on Interested). Delete `client/.next/dev/cache` and stop anything on ports 3000 and 4000 between runs.
+
 ## 3. Test conventions
 
 - Test behavior, not implementation. Descriptive names: `it('rejects OTP after 5 failed attempts')`.

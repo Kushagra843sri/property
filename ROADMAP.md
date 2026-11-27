@@ -67,9 +67,9 @@ Claude: work top-down, one item at a time, tick `[x]` when the definition of don
 - [x] Remove SMS/Twilio and phone verification; phone is collected, optional, unique where present
 - [x] "Interested": ask a Google sign-up for a phone number first; confirmation email to the user; `wa.me` link in the dealer alert
 - [x] WhatsApp button on every listing card and detail page ("Need details regarding it." plus the listing link)
-- [ ] Create the Google OAuth client ID and set it on Render and Vercel
+- [x] Create the Google OAuth client ID and set it on Render and Vercel (client ID is set on both; sign-in on the live site still to be tested by the owner)
 - [ ] Drop the old `phone_1` index on any existing database (see `docs/deploy.md`)
-- [ ] Video links on listings (Bunny Stream embeds), pending approval of the data-model change
+- [x] Video links on listings (Bunny Stream embeds): `videoUrl` field, admin form, portrait video stage at the top of the listing page, preview picture on cards
 
 ## Phase 6 — Ideas for later (do NOT build without approval)
 
@@ -81,11 +81,15 @@ Claude: work top-down, one item at a time, tick `[x]` when the definition of don
 
 ## Content needed from client
 
-- [ ] Logo file (gold winged emblem on a dark tile), brand guide if any, dealer photo and bio
-- [ ] Confirm the business name spelling: "Shree Shyam Properties" (client) vs "Shri Shyam" (shop sign); it is one constant in `client/lib/site.ts`
-- [ ] Confirm both phone numbers (9238306976, 8368966790 are UNVERIFIED, digits partly hidden on the sign) and which one is on WhatsApp
-- [ ] Contact details: email, office address, map location, opening hours (phone numbers: see above)
+- [x] Logo file (received 2026-11-28; site palette is black and gold to match)
+- [ ] Brand guide if any, dealer photo and bio
+- [x] Business name confirmed: "Shree Shyam Properties"
+- [x] Both phone numbers confirmed on WhatsApp: 8368966790 (business, shown first and used for WhatsApp), 9238306976 (owner's personal)
+- [x] Contact email, Google Maps link and opening hours (9 am to 9 pm)
+- [ ] Street address of the shop (the site links to Google Maps until it is supplied)
 - [ ] Business facts for the About page: story, years of experience, areas served
-- [ ] Property data and photos
+- [x] First six listings and the Sector 19 photos loaded
+- [ ] Photos for the five video-only listings
 - [ ] Privacy policy / terms review
-- [ ] Domain and hosting decisions
+- [x] Domain `shyamhomes.co.in`, Vercel Hobby, Render Free, Atlas, Cloudinary and Resend set up and live
+- [ ] Paid database tier with backups, and Vercel Pro (Hobby is non-commercial), once the client agrees
