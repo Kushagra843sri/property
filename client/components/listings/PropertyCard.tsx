@@ -1,6 +1,7 @@
 import Link from 'next/link';
-import { Bath, BedDouble, MessageCircle, Ruler } from 'lucide-react';
+import { Bath, BedDouble, MessageCircle, Play, Ruler } from 'lucide-react';
 import { listingWhatsappLink } from '@/lib/site';
+import { videoThumb } from '@/lib/video';
 import type { Property } from '@/lib/types';
 import { formatArea, formatLocation, formatPrice, specLine } from '@/lib/format';
 import { Badge } from '@/components/ui/Badge';
@@ -27,7 +28,7 @@ export function PropertyCard({ property: p, priority, index = 0 }: Props) {
       <div className="relative aspect-[4/3] overflow-hidden bg-sunken">
         <div className="absolute inset-0 transition-transform duration-[600ms] ease-out group-hover:scale-[1.04]">
           <PropertyImage
-            src={first?.url}
+            src={first?.url ?? videoThumb(p.videoUrl)}
             alt={first?.alt || `${specLine(p)} in ${formatLocation(p.address)}`}
             sizes="(min-width: 1024px) 380px, (min-width: 640px) 50vw, 100vw"
             priority={priority ?? false}
@@ -40,6 +41,14 @@ export function PropertyCard({ property: p, priority, index = 0 }: Props) {
           <Badge tone="neutral">{p.purpose === 'rent' ? 'For rent' : 'For sale'}</Badge>
           {p.videoUrl && <Badge tone="forest">Video</Badge>}
         </div>
+        {p.videoUrl && (
+          <span
+            aria-hidden
+            className="pointer-events-none absolute bottom-3 right-3 grid size-11 place-items-center rounded-full bg-black/60 text-gold-bright ring-1 ring-gold/60 backdrop-blur-sm transition-transform duration-300 group-hover:scale-110"
+          >
+            <Play size={18} fill="currentColor" />
+          </span>
+        )}
       </div>
 
       <div className="flex min-w-0 flex-1 flex-col gap-3 break-words p-5">

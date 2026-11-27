@@ -5,6 +5,7 @@ import { buildQuery } from '@/lib/api';
 import { formatArea, formatPrice, specLine, typeLabel } from '@/lib/format';
 import { activeCount, parseFilters, toApiQuery, toSearchParams } from '@/lib/listing-query';
 import { SITE, listingWhatsappLink, whatsappLink } from '@/lib/site';
+import { BUNNY_CDN_HOST, videoThumb } from '@/lib/video';
 import { checkContrast } from '../scripts/contrast.mjs';
 
 describe('formatPrice', () => {
@@ -144,5 +145,20 @@ describe('design tokens', () => {
     const css = readFileSync('styles/tokens.css', 'utf8');
     const failing = checkContrast(css).filter((r: { pass: boolean }) => !r.pass);
     expect(failing).toEqual([]);
+  });
+});
+
+describe('videoThumb', () => {
+  const id = '4dc36ecd-b1c3-437e-a58a-48e523155c77';
+  it('builds the preview picture address from a Bunny player link', () => {
+    expect(videoThumb(`https://iframe.mediadelivery.net/embed/823842/${id}`)).toBe(
+      `https://${BUNNY_CDN_HOST}/${id}/thumbnail.jpg`,
+    );
+    expect(videoThumb(`https://player.mediadelivery.net/play/823842/${id}`)).toContain(id);
+  });
+  it('returns undefined for no link or a link that is not a Bunny player', () => {
+    expect(videoThumb(undefined)).toBeUndefined();
+    expect(videoThumb(null)).toBeUndefined();
+    expect(videoThumb('https://evil.example/embed/1/' + id)).toBeUndefined();
   });
 });

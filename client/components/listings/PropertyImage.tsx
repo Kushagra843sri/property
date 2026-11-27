@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { useState } from 'react';
 import { ImageOff } from 'lucide-react';
 import { cn } from '@/lib/cn';
+import { BUNNY_CDN_HOST } from '@/lib/video';
 
 interface Props {
   src?: string | undefined;
@@ -34,7 +35,8 @@ export function PropertyImage({ src, alt, sizes, priority, className }: Props) {
       fill
       sizes={sizes}
       priority={priority}
-      unoptimized={src.endsWith('.svg')}
+      // The Bunny CDN rejects requests without a Referer, so it cannot go through Next's optimizer.
+      unoptimized={src.endsWith('.svg') || src.startsWith(`https://${BUNNY_CDN_HOST}/`)}
       onError={() => setFailed(true)}
       className={cn('object-cover', className)}
     />

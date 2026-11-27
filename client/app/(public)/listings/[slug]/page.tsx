@@ -3,12 +3,14 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Check, MapPin, MessageCircle, Phone } from 'lucide-react';
 import { Gallery } from '@/components/listings/Gallery';
+import { VideoStage } from '@/components/listings/VideoStage';
 import { InterestButton } from '@/components/listings/InterestButton';
 import { Badge } from '@/components/ui/Badge';
 import { LinkButton } from '@/components/ui/Button';
 import { ApiError, serverGet } from '@/lib/api';
 import { formatArea, formatLocation, formatPrice, specLine } from '@/lib/format';
 import { SITE, listingWhatsappLink } from '@/lib/site';
+import { videoThumb } from '@/lib/video';
 import type { Property } from '@/lib/types';
 
 type Params = Promise<{ slug: string }>;
@@ -29,7 +31,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   const priceText = formatPrice(p.price, p.priceUnit);
   const head = [`${specLine(p)} in ${formatLocation(p.address)}`, priceText].filter(Boolean);
   const desc = `${head.join(', ')}. ${p.description}`.slice(0, 160);
-  const img = p.images[0]?.url;
+  const img = p.images[0]?.url ?? videoThumb(p.videoUrl);
   return {
     title: p.title,
     description: desc,
@@ -76,7 +78,9 @@ export default async function PropertyPage({ params }: { params: Params }) {
     url: `${SITE.url}/listings/${p.slug}`,
     description: p.description,
     datePosted: p.createdAt,
-    image: p.images.map((i) => (i.url.startsWith('/') ? `${SITE.url}${i.url}` : i.url)),
+    image: p.images.length
+      ? p.images.map((i) => (i.url.startsWith('/') ? `${SITE.url}${i.url}` : i.url))
+      : [videoThumb(p.videoUrl)].filter(Boolean),
     offers: {
       '@type': 'Offer',
       ...(p.price !== null && { price: p.price }), // omitted when no price is entered
@@ -108,7 +112,11 @@ export default async function PropertyPage({ params }: { params: Params }) {
 
       <div className="grid gap-x-14 gap-y-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,22rem)]">
         <div className="min-w-0 lg:col-start-1 lg:row-start-1">
-          <Gallery images={p.images} title={p.title} />
+          {p.videoUrl ? (
+            <VideoStage src={p.videoUrl} title={p.title} />
+          ) : (
+            <Gallery images={p.images} title={p.title} />
+          )}
 
           <header className="mt-8">
             <div className="mb-3 flex flex-wrap gap-2">
@@ -126,22 +134,12 @@ export default async function PropertyPage({ params }: { params: Params }) {
 
         {/* Sections below the header; on phones the contact panel sits between header and these. */}
         <div className="min-w-0 lg:col-start-1 lg:row-start-2">
-          {p.videoUrl && (
-            <section aria-labelledby="video" className="mt-8">
-              <h2 id="video" className="mb-3 text-[length:var(--text-xl)]">
-                Video tour
+          {p.videoUrl && p.images.length > 0 && (
+            <section aria-labelledby="photos" className="mt-8">
+              <h2 id="photos" className="mb-3 text-[length:var(--text-xl)]">
+                Photos
               </h2>
-              <div className="aspect-video overflow-hidden rounded-lg border border-line bg-black">
-                <iframe
-                  title={`Video tour of ${p.title}`}
-                  src={p.videoUrl}
-                  loading="lazy"
-                  allow="accelerometer; gyroscope; encrypted-media; picture-in-picture"
-                  allowFullScreen
-                  referrerPolicy="no-referrer-when-downgrade"
-                  className="size-full"
-                />
-              </div>
+              <Gallery images={p.images} title={p.title} />
             </section>
           )}
 
