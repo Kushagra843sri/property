@@ -1,31 +1,31 @@
-/* Hallmark · v2.0.0 · theme: Ledger, retinted green and gold · genre: editorial · job: browse + enquire
+/* Hallmark · v2.0.0 · theme: Ledger, retinted black and gold · genre: editorial · job: browse + enquire
    critique: restrained palette, photographs lead, serif prices; motion explains, never decorates
    waive 49b (home and listings): listing titles are data and wrap rather than truncate (every title stays readable)
    waive 44c, 78 (utility pages): listings and contact are tools, not landing strips */
 
 /* Design tokens. EVERYTHING visual is defined here once; swap the brand by editing this file. */
 :root {
-  /* Brand palette: deep green, gold lettering, white panels (PLACEHOLDER until the real logo/brand
-     guide arrives; the sign shows green + gold). Change colours here only. */
-  --paper: #f5f3ea;
-  --paper-raised: #fffdf9; /* white panels (tinted a hair toward the paper) */
-  --paper-sunken: #e8e6d8;
-  --ink: #11201a;
-  --ink-muted: #44524b;
-  --line: #d2d5c6;
-  --line-strong: #7b867d;
-  --forest: #0f4a35; /* primary: buttons, links */
-  --forest-hover: #0b3a29;
-  --forest-deep: #0a2e21; /* header / footer background */
+  /* Brand palette from the client's logo: gold on black. Warm cream stays as the reading surface.
+     Names are historic: "forest" now means the primary dark (black), not green. Change colours here only. */
+  --paper: #f6f2e8;
+  --paper-raised: #fffdf8; /* white panels (tinted a hair toward the paper) */
+  --paper-sunken: #ebe6d6;
+  --ink: #15120c;
+  --ink-muted: #4b453a;
+  --line: #ddd5c2;
+  --line-strong: #857d6b;
+  --forest: #1a1610; /* primary: buttons, links (black) */
+  --forest-hover: #33291a;
+  --forest-deep: #0b0a07; /* header / footer / hero background */
   --on-forest: #fffdf8;
-  --on-forest-muted: #c7d5cc;
-  --line-on-dark: #2e5645;
-  --gold: #c9a227; /* decorative only: rules, emblem, big marks */
-  --gold-bright: #e3c45e; /* gold lettering on the dark green */
+  --on-forest-muted: #cfc8b4;
+  --line-on-dark: #3b3220;
+  --gold: #e0b030; /* the logo gold: rules, emblem, big marks, buttons on dark */
+  --gold-bright: #f0c64e; /* gold lettering on black */
   --gold-ink: #6b5200; /* gold as readable text on light surfaces */
-  --focus: #0f4a35;
-  --focus-on-dark: #e3c45e;
-  --scrim: rgb(10 46 33 / 0.6);
+  --focus: #1a1610;
+  --focus-on-dark: #f0c64e;
+  --scrim: rgb(11 10 7 / 0.65);
 
   /* Semantic */
   --success: #2a6a3b;
