@@ -136,15 +136,19 @@ export async function verifyOtp(
   return user ? String(user._id) : null;
 }
 
-/** Email + password login for end users. One generic failure; timing flattened for unknown emails. */
+/**
+ * Email + password login for everyone. Admins use this same form; their role decides what they can
+ * reach. Admin accounts come from the CLI, never public sign-up, so they skip the e-mail-code check.
+ * One generic failure; timing flattened for unknown emails.
+ */
 export async function passwordLogin(email: string, password: string): Promise<string | null> {
-  const user = await User.findOne({ email, role: 'user' }).select('+passwordHash');
+  const user = await User.findOne({ email }).select('+passwordHash');
   if (!user?.passwordHash) {
     await dummyVerify(password);
     return null;
   }
   const ok = await verifyPassword(user.passwordHash, password);
-  return ok && user.emailVerified ? String(user._id) : null;
+  return ok && (user.role === 'admin' || user.emailVerified) ? String(user._id) : null;
 }
 
 /**
@@ -192,14 +196,4 @@ export async function googleLogin(
     if (!user || user.role !== 'user') throw AppError.unauthorized('Google sign-in failed');
   }
   return String(user._id);
-}
-
-/** Admin password login. Returns the admin's id or null; timing is flattened for unknown emails. */
-export async function adminLogin(email: string, password: string): Promise<string | null> {
-  const admin = await User.findOne({ email, role: 'admin' }).select('+passwordHash');
-  if (!admin?.passwordHash) {
-    await dummyVerify(password);
-    return null;
-  }
-  return (await verifyPassword(admin.passwordHash, password)) ? String(admin._id) : null;
 }

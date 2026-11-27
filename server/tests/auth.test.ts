@@ -324,15 +324,13 @@ describe('password sign-in', () => {
     expect(ok.status).toBe(200); // the same code still works
   });
 
-  it('gives one generic failure for wrong password, unknown email, passwordless and admin accounts', async () => {
+  it('gives one generic failure for wrong password, unknown email and passwordless accounts', async () => {
     const { u } = await signUpWithPassword();
     const passwordless = await signUpAndLogin(); // verified by code only, no password
-    const admin = await createAdmin();
     const attempts = [
       { email: u.email, password: 'wrong password 123' },
       { email: 'nobody@example.com', password: STRONG },
       { email: passwordless.user.email, password: STRONG },
-      { email: admin.email, password: admin.password },
     ];
     const messages = new Set<string>();
     for (const a of attempts) {
@@ -580,14 +578,14 @@ describe('sessions', () => {
   });
 });
 
-describe('admin login', () => {
-  it('logs in an admin with the right password and sets admin role', async () => {
+describe('admin sign-in through the normal login', () => {
+  it('signs an admin in with the right password and sets the admin role', async () => {
     const { session } = await loginAdmin();
     const me = await session.get(`${A}/me`);
     expect(me.body.data.user.role).toBe('admin');
   });
 
-  it('gives one generic failure for wrong password, unknown email and non-admin users', async () => {
+  it('gives one generic failure for a wrong admin password, an unknown email and a wrong customer password', async () => {
     const admin = await createAdmin();
     const { user } = await signUpAndLogin();
     const attempts = [
@@ -597,18 +595,26 @@ describe('admin login', () => {
     ];
     const bodies = [];
     for (const a of attempts) {
-      const r = await request(app).post(`${A}/admin/login`).send(a);
+      const r = await request(app).post(`${A}/login`).send(a);
       expect(r.status).toBe(401);
       bodies.push(r.body.error.message);
     }
     expect(new Set(bodies).size).toBe(1);
   });
 
-  it('rate limits admin login', async () => {
+  it('the old separate admin login no longer exists', async () => {
+    const admin = await createAdmin();
+    const r = await request(app)
+      .post(`${A}/admin/login`)
+      .send({ email: admin.email, password: admin.password });
+    expect(r.status).toBe(404);
+  });
+
+  it('rate limits sign-in tries, which protects the admin password too', async () => {
     let last = 0;
     for (let i = 0; i < 10; i++) {
       const r = await request(app)
-        .post(`${A}/admin/login`)
+        .post(`${A}/login`)
         .set('x-test-rate-limit', '1')
         .send({ email: 'a@b.co', password: 'x' });
       last = r.status;

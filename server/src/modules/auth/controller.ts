@@ -14,14 +14,7 @@ import {
   signAccessToken,
 } from './tokens.js';
 import * as service from './service.js';
-import type {
-  AdminLoginBody,
-  GoogleBody,
-  LoginBody,
-  OtpRequestBody,
-  OtpVerifyBody,
-  SignupBody,
-} from './schema.js';
+import type { GoogleBody, LoginBody, OtpRequestBody, OtpVerifyBody, SignupBody } from './schema.js';
 
 const body = <T>(req: Request) => req.validated.body as T;
 const GENERIC_BAD_CODE = 'Invalid or expired code';
@@ -78,7 +71,10 @@ export const otpVerify: RequestHandler = async (req, res) => {
   const user = await User.findById(userId);
   if (!user) throw AppError.badRequest(GENERIC_BAD_CODE);
   await startSession(res, userId, user.role);
-  logger.info({ userId }, 'user logged in');
+  logger.info(
+    { userId, role: user.role },
+    user.role === 'admin' ? 'admin logged in' : 'user logged in',
+  );
   res.json({ data: { user: publicUser(user) } });
 };
 
@@ -101,17 +97,6 @@ export const google: RequestHandler = async (req, res) => {
   if (!user) throw AppError.unauthorized('Google sign-in failed');
   await startSession(res, userId, user.role);
   logger.info({ userId }, 'user logged in with google');
-  res.json({ data: { user: publicUser(user) } });
-};
-
-export const adminLogin: RequestHandler = async (req, res) => {
-  const b = body<AdminLoginBody>(req);
-  const adminId = await service.adminLogin(b.email, b.password);
-  if (!adminId) throw AppError.unauthorized('Invalid credentials');
-  const user = await User.findById(adminId);
-  if (!user) throw AppError.unauthorized('Invalid credentials');
-  await startSession(res, adminId, 'admin');
-  logger.info({ adminId }, 'admin logged in');
   res.json({ data: { user: publicUser(user) } });
 };
 

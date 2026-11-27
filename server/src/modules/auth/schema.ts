@@ -57,11 +57,8 @@ export const googleBody = z
   })
   .strict();
 
-export const adminLoginBody = z.object({ email, password }).strict();
-
 export type SignupBody = z.infer<typeof signupBody>;
 export type OtpRequestBody = z.infer<typeof otpRequestBody>;
 export type OtpVerifyBody = z.infer<typeof otpVerifyBody>;
 export type LoginBody = z.infer<typeof loginBody>;
 export type GoogleBody = z.infer<typeof googleBody>;
-export type AdminLoginBody = z.infer<typeof adminLoginBody>;

@@ -98,7 +98,7 @@ export async function createAdmin(password = 'a-very-long-admin-pass-1') {
 export async function loginAdmin() {
   const a = await createAdmin();
   const s = makeSession();
-  const res = await s.post('/api/v1/auth/admin/login', { email: a.email, password: a.password });
+  const res = await s.post('/api/v1/auth/login', { email: a.email, password: a.password });
   if (res.status !== 200) throw new Error(`admin login failed ${res.status}`);
   return { session: s, ...a };
 }
