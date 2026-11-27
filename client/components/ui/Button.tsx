@@ -2,7 +2,7 @@ import Link from 'next/link';
 import type { ComponentProps, ReactNode } from 'react';
 import { cn } from '@/lib/cn';
 
-type Variant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'onDark' | 'ghostDark';
+type Variant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'onDark' | 'ghostDark' | 'gold';
 type Size = 'md' | 'lg';
 
 const base =
@@ -15,9 +15,11 @@ const variants: Record<Variant, string> = {
   secondary: 'border border-forest text-forest hover:bg-forest hover:text-on-forest',
   ghost: 'text-forest hover:bg-sunken',
   danger: 'bg-error text-on-forest hover:opacity-90',
-  // For the dark green header/footer
+  // For the black header/footer
   onDark: 'border border-gold-bright text-gold-bright hover:bg-gold-bright hover:text-forest-deep',
   ghostDark: 'text-on-forest hover:bg-line-on-dark',
+  // Main action on the black hero
+  gold: 'bg-gold text-forest-deep font-semibold hover:bg-gold-bright',
 };
 const sizes: Record<Size, string> = {
   md: 'min-h-11 px-5 text-[0.9375rem]',

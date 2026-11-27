@@ -12,7 +12,7 @@ const HeroScene = dynamic(() => import('./HeroScene'), { ssr: false });
 /**
  * 3D is an enhancement for large, capable screens only. Phones, small tablets, low-memory or
  * low-core devices, data-saver and reduced-motion users keep the static poster, and never download
- * the three.js chunk (it cost ~130 KB and ~1.4 s of main-thread time on a throttled phone).
+ * the three.js chunk (it costs ~130 KB and ~1.4 s of main-thread time on a throttled phone).
  */
 function canUse3d(): boolean {
   if (!FEATURES.hero3d || typeof window === 'undefined') return false;
@@ -71,16 +71,21 @@ export function HeroVisual({ poster }: { poster: string }) {
   return (
     <div
       ref={box}
-      className="relative aspect-[16/11] overflow-hidden rounded-lg bg-sunken sm:aspect-[16/10]"
+      className="relative aspect-[16/11] overflow-hidden rounded-lg border border-line-on-dark bg-forest-deep sm:aspect-[16/10]"
     >
+      {/* The poster is the first paint (LCP). It fades out once the 3D scene is ready so the two
+          never overlap. */}
       <Image
         src={poster}
-        alt="Illustration of apartment buildings. PLACEHOLDER until the dealer's photography is supplied."
+        alt="Illustration of a gold and black city skyline"
         fill
         priority
         unoptimized
         sizes="(min-width: 1024px) 720px, 100vw"
-        className="object-cover"
+        className={cn(
+          'object-cover transition-opacity duration-[800ms] ease-out',
+          ready ? 'opacity-0' : 'opacity-100',
+        )}
       />
       {enabled && (
         <div
@@ -91,6 +96,15 @@ export function HeroVisual({ poster }: { poster: string }) {
         >
           <HeroScene active={inView && tabVisible} onReady={() => setReady(true)} />
         </div>
+      )}
+      {ready && (
+        <span
+          aria-hidden
+          className="pointer-events-none absolute bottom-3 left-3 rounded-pill bg-black/55 px-3 py-1.5 text-xs text-on-forest-muted ring-1 ring-line-on-dark backdrop-blur-sm"
+          style={{ borderRadius: 'var(--r-pill)' }}
+        >
+          Drag to turn
+        </span>
       )}
     </div>
   );

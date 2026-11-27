@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import { PropertyCard } from '@/components/listings/PropertyCard';
 import { Reveal } from '@/components/motion/Reveal';
+import { HeroSearch } from '@/components/home/HeroSearch';
 import { HeroVisual } from '@/components/three/HeroVisual';
 import { LinkButton } from '@/components/ui/Button';
 import { serverGet } from '@/lib/api';
@@ -29,52 +30,57 @@ const QUICK = [
   { label: 'Offices', href: '/listings?type=office' },
 ];
 
-/** Top areas that have listings, for the "Popular areas" links. Empty on any failure. */
-async function popularAreas(): Promise<AreaOption[]> {
+/** Areas that have listings (hero search and "Popular areas"). Empty on any failure. */
+async function areasWithListings(): Promise<AreaOption[]> {
   return serverGet<AreaOption[]>('/properties/areas', 300)
-    .then((r) => r.data.filter((a) => a.top && a.count > 0))
+    .then((r) => r.data.filter((a) => a.count > 0))
     .catch(() => []);
 }
 
 export default async function HomePage() {
-  const [items, areas] = await Promise.all([featured(), popularAreas()]);
+  const [items, allAreas] = await Promise.all([featured(), areasWithListings()]);
+  const areas = allAreas.filter((a) => a.top);
 
   return (
     <>
       <section
         aria-labelledby="hero-title"
-        className="container-page grid items-center gap-10 pt-10 pb-12 sm:pt-14 lg:grid-cols-12 lg:gap-12 lg:pt-20 lg:pb-[var(--section-gap)]"
+        className="on-dark relative isolate overflow-hidden bg-forest-deep text-on-forest"
       >
-        <div className="lg:col-span-5">
-          <h1 id="hero-title" className="text-[length:var(--text-hero)]">
-            <span className="line-mask" style={{ ['--i' as string]: 0 }}>
-              <span>Buy, rent or</span>
-            </span>
-            <span className="line-mask" style={{ ['--i' as string]: 1 }}>
-              <span>find a room</span>
-            </span>
-          </h1>
-          <p
-            className="fade-up mt-6 max-w-[34ch] text-[length:var(--text-lg)] text-muted"
-            style={{ ['--d' as string]: '450ms' }}
-          >
-            Flats, shops, offices, PG and furnished rooms, for sale and rent.
-          </p>
-          <div className="fade-up mt-8 flex flex-wrap gap-3" style={{ ['--d' as string]: '560ms' }}>
-            <LinkButton href="/listings?purpose=buy" size="lg">
-              Buy a property
-            </LinkButton>
-            <LinkButton href="/listings?purpose=rent" size="lg">
-              Rent a property
-            </LinkButton>
+        {/* A warm gold glow behind the 3D scene. */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(60%_90%_at_72%_45%,rgb(224_176_48/0.2),transparent_70%)]"
+        />
+        <div className="container-page grid items-center gap-10 py-12 sm:py-16 lg:grid-cols-12 lg:gap-10 lg:py-20">
+          <div className="lg:col-span-5">
+            <h1 id="hero-title" className="text-[length:var(--text-hero)]">
+              <span className="line-mask" style={{ ['--i' as string]: 0 }}>
+                <span>Buy, rent or</span>
+              </span>
+              <span className="line-mask text-gold-bright" style={{ ['--i' as string]: 1 }}>
+                <span>find a room</span>
+              </span>
+            </h1>
+            <p
+              className="fade-up mb-8 mt-6 max-w-[36ch] text-[length:var(--text-lg)] text-on-forest-muted"
+              style={{ ['--d' as string]: '400ms' }}
+            >
+              Flats, shops, offices, PG and furnished rooms, for sale and rent.
+            </p>
+            <HeroSearch areas={allAreas} />
+          </div>
+          <div className="fade-up lg:col-span-7" style={{ ['--d' as string]: '200ms' }}>
+            <HeroVisual poster="/placeholders/hero-poster.svg" />
           </div>
         </div>
-        <div className="fade-up lg:col-span-7" style={{ ['--d' as string]: '200ms' }}>
-          <HeroVisual poster="/placeholders/hero-poster.svg" />
-        </div>
+        <div
+          aria-hidden
+          className="h-px bg-gradient-to-r from-transparent via-gold to-transparent"
+        />
       </section>
 
-      <section aria-labelledby="find-title" className="container-page pb-[var(--section-gap)]">
+      <section aria-labelledby="find-title" className="container-page py-[var(--section-gap)]">
         <h2 id="find-title" className="sr-only">
           Find a property
         </h2>
