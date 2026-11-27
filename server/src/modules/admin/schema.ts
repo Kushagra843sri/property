@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { VIDEO_URL_PATTERN } from '../../config/constants.js';
 import {
   AREA_UNITS,
   FURNISHINGS,
@@ -44,6 +45,12 @@ const propertyFields = {
     .strict(),
   geo: z.object({ lat: z.number().min(-90).max(90), lng: z.number().min(-180).max(180) }).strict(),
   amenities: z.array(s(60)).max(40),
+  videoUrl: z
+    .string()
+    .trim()
+    .max(300)
+    .regex(VIDEO_URL_PATTERN, 'Use a Bunny Stream player link')
+    .nullable(), // null removes the video
   status: z.enum(PROPERTY_STATUSES),
   featured: z.boolean(),
 };

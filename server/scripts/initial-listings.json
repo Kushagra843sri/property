@@ -1,0 +1,117 @@
+[
+  {
+    "property": {
+      "title": "2 BHK semi-furnished flat for rent in Dwarka Mor",
+      "type": "flat",
+      "purpose": "rent",
+      "price": 20000,
+      "priceUnit": "per-month",
+      "bhk": 2,
+      "furnishing": "semi-furnished",
+      "floor": 3,
+      "amenities": ["Lift", "Car parking"],
+      "description": "2 BHK semi-furnished flat on the 3rd floor with lift and car parking. Metro station only 100 metres away.",
+      "address": {
+        "locality": "Dwarka Mor",
+        "city": "Delhi",
+        "state": "Delhi"
+      },
+      "videoUrl": "https://iframe.mediadelivery.net/embed/823842/bd8b4888-bf43-4591-acbc-d2f235d3bcb9"
+    }
+  },
+  {
+    "property": {
+      "title": "Fully furnished flat for rent near NSIT, Dwarka Mor",
+      "type": "flat",
+      "purpose": "rent",
+      "price": 21000,
+      "priceUnit": "per-month",
+      "furnishing": "furnished",
+      "floor": 2,
+      "amenities": ["Lift"],
+      "description": "Fully furnished flat on the 2nd floor with lift, near NSIT college, Dwarka Mor. Rent is fixed.",
+      "address": {
+        "locality": "Dwarka Mor",
+        "city": "Delhi",
+        "state": "Delhi"
+      },
+      "videoUrl": "https://iframe.mediadelivery.net/embed/823842/ee613e5d-e8f6-481f-b4ba-fb5426e940e4"
+    }
+  },
+  {
+    "photosDir": true,
+    "property": {
+      "title": "Fully furnished flat for rent in Dwarka Sector 19, B Block",
+      "type": "flat",
+      "purpose": "rent",
+      "price": 35000,
+      "priceUnit": "per-month",
+      "furnishing": "furnished",
+      "floor": 3,
+      "amenities": ["Car parking", "All amenities available"],
+      "description": "Fully furnished flat on the 3rd floor (no lift) in B Block, Sector 19, Dwarka. All amenities available, with car parking.\n\n2 months security deposit.\nMaintenance: ₹700 per month.",
+      "address": {
+        "locality": "Dwarka Sector 19",
+        "line": "B Block",
+        "city": "Delhi",
+        "state": "Delhi"
+      }
+    }
+  },
+  {
+    "property": {
+      "title": "2 BHK furnished flat for rent near Nawada Metro",
+      "type": "flat",
+      "purpose": "rent",
+      "price": 20000,
+      "priceUnit": "per-month",
+      "bhk": 2,
+      "furnishing": "furnished",
+      "amenities": ["Parking", "AC", "RO", "Geyser", "Fridge", "Washing machine", "WiFi"],
+      "description": "Fully furnished 2 BHK flat with parking, AC, RO, geyser, fridge, washing machine and WiFi. Metro station is 500 metres away.",
+      "address": {
+        "locality": "Nawada",
+        "city": "Delhi",
+        "state": "Delhi"
+      },
+      "videoUrl": "https://iframe.mediadelivery.net/embed/823842/b03b860a-a8a7-4aec-a9a2-8d14b8653157"
+    }
+  },
+  {
+    "property": {
+      "title": "120 gaj flat for rent in Dwarka Sector 15",
+      "type": "flat",
+      "purpose": "rent",
+      "price": 30000,
+      "priceUnit": "per-month",
+      "floor": 3,
+      "amenities": ["Car parking"],
+      "description": "120 gaj (square yards), two sides open, on the main road. Third floor with car parking, no lift.",
+      "address": {
+        "locality": "Dwarka Sector 15",
+        "city": "Delhi",
+        "state": "Delhi"
+      },
+      "videoUrl": "https://iframe.mediadelivery.net/embed/823842/4dc36ecd-b1c3-437e-a58a-48e523155c77"
+    }
+  },
+  {
+    "property": {
+      "title": "3 BHK furnished flat for rent in Subhash Nagar",
+      "type": "flat",
+      "purpose": "rent",
+      "price": 42000,
+      "priceUnit": "per-month",
+      "bhk": 3,
+      "furnishing": "furnished",
+      "amenities": ["Lift", "Parking"],
+      "description": "Fully furnished 3 BHK flat with lift and parking. Only for service-class families.",
+      "address": {
+        "locality": "Subhash Nagar",
+        "city": "Delhi",
+        "state": "Delhi"
+      },
+      "videoUrl": "https://iframe.mediadelivery.net/embed/823842/df7c348c-6df6-4dc4-afb6-adfcd1677962"
+    }
+  }
+]

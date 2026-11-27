@@ -57,6 +57,7 @@ const propertySchema = new Schema(
         order: { type: Number, default: 0 },
       },
     ],
+    videoUrl: { type: String, maxlength: 300 }, // Bunny Stream player link; videos live there, not here
     status: { type: String, enum: PROPERTY_STATUSES, default: 'available' },
     featured: { type: Boolean, default: false },
     viewCount: { type: Number, default: 0 },

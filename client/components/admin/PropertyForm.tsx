@@ -90,6 +90,7 @@ export function PropertyForm({
       facing: str(fd.get('facing')),
       possession: str(fd.get('possession')),
       amenities,
+      videoUrl: str(fd.get('videoUrl')) ?? null, // empty removes the video
       address: clean({
         city,
         locality: str(fd.get('locality')),
@@ -323,6 +324,21 @@ export function PropertyForm({
         hint="Separate with commas, for example: Parking, Lift, Power backup"
       >
         {(a) => <Input {...a} name="amenities" defaultValue={d?.amenities.join(', ')} />}
+      </Field>
+      <Field
+        label="Video link (optional)"
+        error={errors.videoUrl}
+        hint="Bunny Stream player link, for example https://iframe.mediadelivery.net/embed/123456/video-id"
+      >
+        {(a) => (
+          <Input
+            {...a}
+            name="videoUrl"
+            type="url"
+            maxLength={300}
+            defaultValue={d?.videoUrl ?? ''}
+          />
+        )}
       </Field>
       <Field label="Description">
         {(a) => (

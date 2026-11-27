@@ -52,6 +52,7 @@ export function toPublic(p: Lean) {
     images: [...(p.images ?? [])]
       .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
       .map(({ url, alt, order }) => ({ url, alt, order })),
+    videoUrl: p.videoUrl ?? null,
     status: p.status,
     featured: p.featured,
     createdAt: p.createdAt,

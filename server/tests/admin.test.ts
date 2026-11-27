@@ -117,6 +117,34 @@ describe('admin properties', () => {
     );
   });
 
+  it('accepts only Bunny player links as the video and lets the admin remove it', async () => {
+    const { session } = await loginAdmin();
+    const good =
+      'https://iframe.mediadelivery.net/embed/123456/0a1b2c3d-1111-2222-3333-444455556666';
+    const bad = [
+      'http://iframe.mediadelivery.net/embed/1/x',
+      'https://evil.example/embed/1/y',
+      'javascript:alert(1)',
+    ];
+    for (const videoUrl of bad)
+      expect((await session.post(`${AD}/properties`, { ...newProp, videoUrl })).status).toBe(400);
+    const created = await session.post(`${AD}/properties`, { ...newProp, videoUrl: good });
+    expect(created.status).toBe(201);
+    const pub = await request(app).get(`/api/v1/properties/${created.body.data.slug}`);
+    expect(pub.body.data.videoUrl).toBe(good);
+    const player =
+      'https://player.mediadelivery.net/play/123456/0a1b2c3d-1111-2222-3333-444455556666';
+    expect((await session.post(`${AD}/properties`, { ...newProp, videoUrl: player })).status).toBe(
+      201,
+    );
+    const cleared = await session.patch(`${AD}/properties/${created.body.data.id}`, {
+      videoUrl: null,
+    });
+    expect(cleared.status).toBe(200);
+    const after = await request(app).get(`/api/v1/properties/${created.body.data.slug}`);
+    expect(after.body.data.videoUrl).toBeNull();
+  });
+
   it('validates input strictly', async () => {
     const { session } = await loginAdmin();
     const bad = [
