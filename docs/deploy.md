@@ -31,6 +31,8 @@ So buy the domain first and attach `www.` to Vercel and `api.` to Render (both s
 
 ## 2. API on Render
 
+The repo root has a `render.yaml` Blueprint: in Render choose **New, Blueprint**, pick the repo, and fill in only the four empty secret boxes (`MONGODB_URI`, `RESEND_API_KEY`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET`). Render generates the JWT secrets. The manual setup below is the same thing by hand.
+
 Use a **Web Service** with Docker (`server/Dockerfile`) or Node (build `npm ci && npm run build`, start `npm start`, root directory `server`). Health check path: `/api/v1/health`.
 
 Environment variables (checklist, all names are in `server/.env.example`):
