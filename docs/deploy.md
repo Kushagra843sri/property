@@ -6,19 +6,19 @@ Nothing here has been deployed. This is the plan for: **API on Render**, **websi
 
 Login uses cookies. Browsers only send them reliably between the website and the API when both live on the **same registrable domain**:
 
-| Setup                                                   | Works?                                                                                                                                              |
-| ------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `www.yourshop.in` (Vercel) + `api.yourshop.in` (Render) | **Yes. Use this.**                                                                                                                                  |
-| `yourshop.vercel.app` + `yourapi.onrender.com`          | **No.** Different sites: the session cookie is treated as third-party and the CSRF cookie cannot be read by the website. Login would silently fail. |
+| Setup                                                             | Works?                                                                                                                                              |
+| ----------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `www.shyamhomes.co.in` (Vercel) + `api.shyamhomes.co.in` (Render) | **Yes. Use this.**                                                                                                                                  |
+| `yourshop.vercel.app` + `yourapi.onrender.com`                    | **No.** Different sites: the session cookie is treated as third-party and the CSRF cookie cannot be read by the website. Login would silently fail. |
 
 So buy the domain first and attach `www.` to Vercel and `api.` to Render (both services support custom domains with free SSL).
 
 ### How cookies and CSRF behave in the split setup
 
 - The API sets three cookies: `access_token` (15 min) and `refresh_token` (30 days), both `HttpOnly; Secure; SameSite=Lax`, and `csrf_token` (readable by the website's JavaScript).
-- With `COOKIE_DOMAIN=.yourshop.in` the cookies are shared by `www.` and `api.`. `SameSite=Lax` is enough because `www.yourshop.in` and `api.yourshop.in` are **same-site** (only the port/subdomain differs).
+- With `COOKIE_DOMAIN=.shyamhomes.co.in` the cookies are shared by `www.` and `api.`. `SameSite=Lax` is enough because `www.shyamhomes.co.in` and `api.shyamhomes.co.in` are **same-site** (only the port/subdomain differs).
 - Every POST/PATCH/DELETE must carry the header `X-CSRF-Token` equal to the `csrf_token` cookie. The website's `api()` helper (`client/lib/api.ts`) does this automatically. This is the second layer on top of SameSite.
-- CORS: the API allows only the exact origins in `CORS_ORIGINS` (with credentials). Set it to `https://www.yourshop.in` (add `https://yourshop.in` only if you serve the site there too). Never `*`.
+- CORS: the API allows only the exact origins in `CORS_ORIGINS` (with credentials). Set it to both `https://www.shyamhomes.co.in,https://shyamhomes.co.in` (the site is served on both; redirect the one you do not want as canonical). Never `*`.
 - `TRUST_PROXY=1` is mandatory behind Render's proxy, otherwise every visitor appears to have the same IP and the rate limiter blocks everyone together. The API refuses to start in production without it.
 
 ## 1. MongoDB Atlas
@@ -35,28 +35,28 @@ Use a **Web Service** with Docker (`server/Dockerfile`) or Node (build `npm ci &
 
 Environment variables (checklist, all names are in `server/.env.example`):
 
-| Variable                                  | Value                                                                                                                                                                                                         |
-| ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `NODE_ENV`                                | `production`                                                                                                                                                                                                  |
-| `PORT`                                    | leave unset (Render sets it)                                                                                                                                                                                  |
-| `MONGODB_URI`                             | Atlas string                                                                                                                                                                                                  |
-| `CORS_ORIGINS`                            | `https://www.yourshop.in`                                                                                                                                                                                     |
-| `CLIENT_URL`                              | `https://www.yourshop.in`                                                                                                                                                                                     |
-| `COOKIE_DOMAIN`                           | `.yourshop.in`                                                                                                                                                                                                |
-| `TRUST_PROXY`                             | `1`                                                                                                                                                                                                           |
-| `JWT_ACCESS_SECRET`, `JWT_REFRESH_SECRET` | two different 48-byte random values                                                                                                                                                                           |
-| `MAIL_PROVIDER`                           | `resend`, plus `RESEND_API_KEY`, `MAIL_FROM` (an address on a domain verified in Resend)                                                                                                                      |
-| `DEALER_NOTIFY_EMAIL`                     | where "Interested" alerts go                                                                                                                                                                                  |
-| `SMS_PROVIDER`                            | `twilio` + `TWILIO_*`, **required in production** (the console fallback is blocked). If you do not want SMS yet, tell the developer: today production refuses to start without a real SMS provider configured |
-| `IMAGE_PROVIDER`                          | `cloudinary` + `CLOUDINARY_CLOUD_NAME/API_KEY/API_SECRET`                                                                                                                                                     |
-| `LOG_LEVEL`                               | `info`                                                                                                                                                                                                        |
+| Variable                                  | Value                                                                                                                                                                 |
+| ----------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `NODE_ENV`                                | `production`                                                                                                                                                          |
+| `PORT`                                    | leave unset (Render sets it)                                                                                                                                          |
+| `MONGODB_URI`                             | Atlas string                                                                                                                                                          |
+| `CORS_ORIGINS`                            | `https://www.shyamhomes.co.in,https://shyamhomes.co.in`                                                                                                               |
+| `CLIENT_URL`                              | `https://www.shyamhomes.co.in`                                                                                                                                        |
+| `COOKIE_DOMAIN`                           | `.shyamhomes.co.in`                                                                                                                                                   |
+| `TRUST_PROXY`                             | `1`                                                                                                                                                                   |
+| `JWT_ACCESS_SECRET`, `JWT_REFRESH_SECRET` | two different 48-byte random values                                                                                                                                   |
+| `MAIL_PROVIDER`                           | `resend`, plus `RESEND_API_KEY`, `MAIL_FROM` (an address on a domain verified in Resend)                                                                              |
+| `DEALER_NOTIFY_EMAIL`                     | where "Interested" alerts go                                                                                                                                          |
+| `GOOGLE_CLIENT_ID`                        | Public OAuth client ID for Google sign-in (optional; without it the Google button is hidden and the endpoint returns "not available"). **No SMS provider is needed.** |
+| `IMAGE_PROVIDER`                          | `cloudinary` + `CLOUDINARY_CLOUD_NAME/API_KEY/API_SECRET`                                                                                                             |
+| `LOG_LEVEL`                               | `info`                                                                                                                                                                |
 
-The API **refuses to start** in production if any development fallback (console mailer, console SMS, mock image store) is selected, if CORS has `*`, or if `TRUST_PROXY` is 0. That is intentional.
+The API **refuses to start** in production if any development fallback (console mailer, mock image store) is selected, if CORS has `*`, or if `TRUST_PROXY` is 0. That is intentional.
 
 **Create the admin (once, after the first deploy)**, from Render's Shell:
 
 ```bash
-ADMIN_EMAIL=owner@yourshop.in ADMIN_PASSWORD='a long passphrase of 12+ characters' npm run create-admin:prod
+ADMIN_EMAIL=owner@shyamhomes.co.in ADMIN_PASSWORD='a long passphrase of 12+ characters' npm run create-admin:prod
 ```
 
 It refuses demo/example credentials and never inserts sample data. `npm run seed` is development-only and refuses to run in production.
@@ -82,12 +82,13 @@ setRateLimitStoreFactory(
 
 Root directory `client`. Environment variables:
 
-| Variable               | Value                            |
-| ---------------------- | -------------------------------- |
-| `NEXT_PUBLIC_API_URL`  | `https://api.yourshop.in/api/v1` |
-| `NEXT_PUBLIC_SITE_URL` | `https://www.yourshop.in`        |
+| Variable                       | Value                                                     |
+| ------------------------------ | --------------------------------------------------------- |
+| `NEXT_PUBLIC_API_URL`          | `https://api.shyamhomes.co.in/api/v1`                     |
+| `NEXT_PUBLIC_SITE_URL`         | `https://www.shyamhomes.co.in`                            |
+| `NEXT_PUBLIC_GOOGLE_CLIENT_ID` | the same ID as the server's `GOOGLE_CLIENT_ID` (optional) |
 
-Set both **before the first build** (they are baked in at build time). After deploying, open `https://www.yourshop.in/sitemap.xml` and `/robots.txt` to check them. Replace every PLACEHOLDER in `client/lib/site.ts` first (see `docs/handover.md`).
+Set these **before the first build** (they are baked in at build time). After deploying, open `https://www.shyamhomes.co.in/sitemap.xml` and `/robots.txt` to check them. Replace every PLACEHOLDER in `client/lib/site.ts` first (see `docs/handover.md`).
 
 ## 4. Cloudinary and Resend
 
@@ -96,7 +97,7 @@ Set both **before the first build** (they are baked in at build time). After dep
 
 ## 5. First-launch checklist
 
-- [ ] `https://api.yourshop.in/api/v1/health` returns `{"data":{"status":"ok"}}`
+- [ ] `https://api.shyamhomes.co.in/api/v1/health` returns `{"data":{"status":"ok"}}`
 - [ ] Admin created with the command above; sign in at `/admin`
 - [ ] Add one real listing with photos; it appears on the site within a minute
 - [ ] Sign up as a test customer: the OTP email arrives, "I am interested" works, the dealer alert email arrives
@@ -120,4 +121,11 @@ Set both **before the first build** (they are baked in at build time). After dep
 
 - The `Dockerfile` has not been built (Docker is not installed on the build machine). Build it once locally or let Render build it, and watch the first deploy.
 - Several API instances need the Redis store (section 2); a single instance does not.
-- Real provider adapters (Resend, Twilio, Cloudinary) have never run against live accounts; test each right after setting the keys.
+- Real provider adapters (Resend, Cloudinary) and Google token verification have never run against live accounts; test each right after setting the keys.
+
+## Google sign-in (optional, free)
+
+1. In Google Cloud Console create a project, set up the **OAuth consent screen** (External) and **publish** it (otherwise only listed test users can sign in).
+2. **Credentials → Create OAuth client ID → Web application.** Authorized JavaScript origins: `https://shyamhomes.co.in`, `https://www.shyamhomes.co.in` and `http://localhost:3000`.
+3. Copy the Client ID (public; no secret is used) into `GOOGLE_CLIENT_ID` (Render) and `NEXT_PUBLIC_GOOGLE_CLIENT_ID` (Vercel, before the build).
+4. Existing databases: drop the old non-partial `phone_1` index on `users` once, so MongoDB recreates it as "unique where present". Fresh databases need nothing.

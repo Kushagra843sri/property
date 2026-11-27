@@ -1,7 +1,8 @@
 # Property Dealer Website
 
 A website for a single property dealer to showcase the properties he manages and capture leads
-(OTP signup, "Interested" button, admin panel). Next.js client + Express/MongoDB API.
+(password or Google sign-in with an emailed verification code, "Interested" button, admin panel).
+Next.js client + Express/MongoDB API.
 
 See `CLAUDE.md` for project rules and `ARCHITECTURE.md` for structure, data model and API.
 
@@ -10,8 +11,8 @@ See `CLAUDE.md` for project rules and `ARCHITECTURE.md` for structure, data mode
 - Node.js 20+ (developed on 22) and npm
 - MongoDB: an Atlas cluster or a local `mongod`. **Tests do not need it** (they use `mongodb-memory-server`,
   which downloads a MongoDB binary on first run).
-- Accounts needed later (not required to run in development): Resend (email), Twilio (SMS),
-  Cloudinary (images), Atlas (database).
+- Accounts needed later (not required to run in development): Resend (email), Cloudinary (images),
+  Atlas (database), and optionally a Google Cloud OAuth client ID (Google sign-in). There is no SMS.
 
 ## Setup
 
@@ -30,39 +31,39 @@ cd server && npm run dev          # http://localhost:4000/api/v1/health
 cd client && npm run dev          # http://localhost:3000
 ```
 
-In development the console mailer/SMS print OTPs to the server log and the mock image store returns
-placeholder URLs. Production refuses to start with these fallbacks.
+In development the console mailer prints verification codes to the server log and the mock image
+store returns placeholder URLs. Production refuses to start with these fallbacks.
 
 ## Environment variables (`server/.env`)
 
-| Name                                                                   | Purpose                                          | Example                              | Required                                        |
-| ---------------------------------------------------------------------- | ------------------------------------------------ | ------------------------------------ | ----------------------------------------------- |
-| `NODE_ENV`                                                             | `development` / `test` / `production`            | `development`                        | no (default `development`)                      |
-| `PORT`                                                                 | API port                                         | `4000`                               | no                                              |
-| `LOG_LEVEL`                                                            | pino level                                       | `info`                               | no                                              |
-| `MONGODB_URI`                                                          | MongoDB connection string                        | `mongodb://127.0.0.1:27017/property` | yes                                             |
-| `CORS_ORIGINS`                                                         | Comma-separated exact allowed origins            | `http://localhost:3000`              | yes                                             |
-| `TRUST_PROXY`                                                          | Reverse-proxy hops (for correct client IPs)      | `1`                                  | production (must be > 0)                        |
-| `JWT_ACCESS_SECRET`                                                    | Signs access tokens, 32+ chars                   | _(generate)_                         | yes                                             |
-| `JWT_REFRESH_SECRET`                                                   | Signs refresh tokens, 32+ chars                  | _(generate)_                         | yes                                             |
-| `CLIENT_URL`                                                           | Public site URL used in dealer-email links       | `https://example.com`                | no (defaults to first `CORS_ORIGINS`)           |
-| `COOKIE_DOMAIN`                                                        | Cookie domain if client/API are on sibling hosts | `.example.com`                       | no                                              |
-| `MAIL_PROVIDER`                                                        | `console` (dev only) or `resend`                 | `resend`                             | no (default `console`; forbidden in production) |
-| `RESEND_API_KEY`, `MAIL_FROM`                                          | Resend credentials and sender                    | _(provider)_                         | when `MAIL_PROVIDER=resend`                     |
-| `DEALER_NOTIFY_EMAIL`                                                  | Where "Interested"/enquiry alerts go             | `dealer@example.com`                 | production                                      |
-| `SMS_PROVIDER`                                                         | `console` (dev only) or `twilio`                 | `twilio`                             | no (default `console`; forbidden in production) |
-| `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_FROM`               | Twilio credentials                               | _(provider)_                         | when `SMS_PROVIDER=twilio`                      |
-| `IMAGE_PROVIDER`                                                       | `mock` (dev only) or `cloudinary`                | `cloudinary`                         | no (default `mock`; forbidden in production)    |
-| `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` | Cloudinary credentials                           | _(provider)_                         | when `IMAGE_PROVIDER=cloudinary`                |
-| `CLOUDINARY_FOLDER`                                                    | Upload folder                                    | `properties`                         | no                                              |
-| `ADMIN_EMAIL`, `ADMIN_PASSWORD`                                        | Used only by `npm run seed` to create the admin  | _(choose; 12+ chars)_                | for seeding                                     |
+| Name                                                                   | Purpose                                          | Example                               | Required                                        |
+| ---------------------------------------------------------------------- | ------------------------------------------------ | ------------------------------------- | ----------------------------------------------- |
+| `NODE_ENV`                                                             | `development` / `test` / `production`            | `development`                         | no (default `development`)                      |
+| `PORT`                                                                 | API port                                         | `4000`                                | no                                              |
+| `LOG_LEVEL`                                                            | pino level                                       | `info`                                | no                                              |
+| `MONGODB_URI`                                                          | MongoDB connection string                        | `mongodb://127.0.0.1:27017/property`  | yes                                             |
+| `CORS_ORIGINS`                                                         | Comma-separated exact allowed origins            | `http://localhost:3000`               | yes                                             |
+| `TRUST_PROXY`                                                          | Reverse-proxy hops (for correct client IPs)      | `1`                                   | production (must be > 0)                        |
+| `JWT_ACCESS_SECRET`                                                    | Signs access tokens, 32+ chars                   | _(generate)_                          | yes                                             |
+| `JWT_REFRESH_SECRET`                                                   | Signs refresh tokens, 32+ chars                  | _(generate)_                          | yes                                             |
+| `CLIENT_URL`                                                           | Public site URL used in dealer-email links       | `https://example.com`                 | no (defaults to first `CORS_ORIGINS`)           |
+| `COOKIE_DOMAIN`                                                        | Cookie domain if client/API are on sibling hosts | `.example.com`                        | no                                              |
+| `MAIL_PROVIDER`                                                        | `console` (dev only) or `resend`                 | `resend`                              | no (default `console`; forbidden in production) |
+| `RESEND_API_KEY`, `MAIL_FROM`                                          | Resend credentials and sender                    | _(provider)_                          | when `MAIL_PROVIDER=resend`                     |
+| `DEALER_NOTIFY_EMAIL`                                                  | Where "Interested"/enquiry alerts go             | `dealer@example.com`                  | production                                      |
+| `GOOGLE_CLIENT_ID`                                                     | Public OAuth client ID for Google sign-in        | `1234-abc.apps.googleusercontent.com` | no (without it Google sign-in is unavailable)   |
+| `IMAGE_PROVIDER`                                                       | `mock` (dev only) or `cloudinary`                | `cloudinary`                          | no (default `mock`; forbidden in production)    |
+| `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` | Cloudinary credentials                           | _(provider)_                          | when `IMAGE_PROVIDER=cloudinary`                |
+| `CLOUDINARY_FOLDER`                                                    | Upload folder                                    | `properties`                          | no                                              |
+| `ADMIN_EMAIL`, `ADMIN_PASSWORD`                                        | Used only by `npm run seed` to create the admin  | _(choose; 12+ chars)_                 | for seeding                                     |
 
 ### Client (`client/.env.local`, see `client/.env.example`)
 
-| Name                   | Purpose                                                  | Example                        | Required                 |
-| ---------------------- | -------------------------------------------------------- | ------------------------------ | ------------------------ |
-| `NEXT_PUBLIC_API_URL`  | API base URL used by the browser and server components   | `http://localhost:4000/api/v1` | no (this is the default) |
-| `NEXT_PUBLIC_SITE_URL` | Public site URL for canonical links, sitemap and JSON-LD | `https://example.com`          | production               |
+| Name                           | Purpose                                                                      | Example                               | Required                 |
+| ------------------------------ | ---------------------------------------------------------------------------- | ------------------------------------- | ------------------------ |
+| `NEXT_PUBLIC_API_URL`          | API base URL used by the browser and server components                       | `http://localhost:4000/api/v1`        | no (this is the default) |
+| `NEXT_PUBLIC_SITE_URL`         | Public site URL for canonical links, sitemap and JSON-LD                     | `https://example.com`                 | production               |
+| `NEXT_PUBLIC_GOOGLE_CLIENT_ID` | Same value as the server's `GOOGLE_CLIENT_ID`; empty hides the Google button | `1234-abc.apps.googleusercontent.com` | no                       |
 
 Business name, phone numbers, address and hours are constants in `client/lib/site.ts` (marked PLACEHOLDER until confirmed). Colours, fonts and motion values are tokens in `client/styles/tokens.css`. The 3D hero can be switched off with one line in `client/lib/flags.ts`.
 

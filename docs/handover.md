@@ -13,15 +13,15 @@ A website for your business with:
 
 ## What it runs on (accounts you will own)
 
-| Service                  | Used for                       | Who pays                    | Notes                                 |
-| ------------------------ | ------------------------------ | --------------------------- | ------------------------------------- |
-| Domain name              | your web address               | you                         | buy before launch; keep auto-renew on |
-| Vercel                   | the website                    | you (free tier at first)    | holds the public pages                |
-| Render                   | the server behind the site     | you (paid tier recommended) | handles logins, listings, leads       |
-| MongoDB Atlas            | the database                   | you                         | **turn backups on**                   |
-| Cloudinary               | property photos                | you (free tier at first)    |                                       |
-| Resend                   | sending emails (codes, alerts) | you                         | needs your domain verified            |
-| An SMS provider (Twilio) | sending codes by SMS           | you                         | needed by the server today            |
+| Service                 | Used for                       | Who pays                    | Notes                                 |
+| ----------------------- | ------------------------------ | --------------------------- | ------------------------------------- |
+| Domain name             | your web address               | you                         | buy before launch; keep auto-renew on |
+| Vercel                  | the website                    | you (free tier at first)    | holds the public pages                |
+| Render                  | the server behind the site     | you (paid tier recommended) | handles logins, listings, leads       |
+| MongoDB Atlas           | the database                   | you                         | **turn backups on**                   |
+| Cloudinary              | property photos                | you (free tier at first)    |                                       |
+| Resend                  | sending emails (codes, alerts) | you                         | needs your domain verified            |
+| Google Cloud (optional) | "Sign in with Google" button   | you (free)                  | needs a free OAuth client ID          |
 
 Create these accounts **in your own name**, not the developer's, and share access with the developer instead. Keep a written list of logins in a password manager.
 

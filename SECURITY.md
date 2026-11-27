@@ -15,9 +15,10 @@ This site stores **personal data** (names, phone numbers, emails, interests) and
 ## 2. Authentication
 
 - Passwords: hash with **argon2id** (or bcrypt cost ≥ 12). Min length 8, check against common passwords. Never store or log plaintext.
-- Prefer **passwordless/OTP** for end users (phone or email), plus Google sign-in optionally.
+- End users sign in with **email + password** or **Google** (owner's decision, 2026-11-23; see `docs/adr/0004-password-and-google-auth.md`). A user's password is stored only after an **emailed code proves they own the inbox** (so nobody can claim someone else's email), and the same code resets a forgotten password. No SMS.
 - Sessions: **JWT access token (short-lived, ~15 min) + refresh token (rotating)** in **httpOnly, Secure, SameSite=Lax/Strict cookies**. Never in `localStorage`.
-- OTP: 6 digits, hashed at rest, expires in 5–10 min, max 5 attempts, resend cooldown, rate-limited per phone/email **and** per IP.
+- OTP (email only): 6 digits, hashed at rest, expires in 5–10 min, max 5 attempts, resend cooldown, rate-limited per email **and** per IP. Password login has its own strict per-IP limit, a single generic failure message, and constant-time handling of unknown emails.
+- Google sign-in: the server verifies the ID token (signature, expiry, issuer, **our client ID as audience**) and requires `email_verified`. It may link to an existing user by email but **never to an admin**; a new account needs explicit consent.
 - Generic error messages on login/OTP failure (no user enumeration).
 - Logout invalidates the refresh token server-side.
 

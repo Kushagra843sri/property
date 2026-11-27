@@ -10,7 +10,8 @@ Source of truth for structure, data model, and API. Update it whenever these cha
 Browser ──► Next.js (client) ──► Express API (server) ──► MongoDB
                                       │
                                       ├──► Cloudinary/S3 (images)
-                                      └──► Email/WhatsApp provider (OTP + dealer notifications)
+                                      ├──► Email provider (verification codes, user and dealer notifications)
+                                      └──► Google (ID-token verification for Google sign-in)
 ```
 
 - Client renders public pages (SSR/ISR for SEO), calls the API for data and auth.
@@ -37,7 +38,7 @@ Browser ──► Next.js (client) ──► Express API (server) ──► Mong
     /modules           feature modules: auth, users, properties, interests, enquiries, admin
       each: routes.ts · controller.ts · service.ts · schema.ts (zod)
     /middleware        auth, csrf, sanitize, validate, rateLimit, upload, errorHandler
-    /providers         mailer, sms, imageStore (adapters: console/mock for dev, real for prod)
+    /providers         mailer, google, imageStore (adapters: console/mock for dev, real for prod)
     /utils             logger, otp, phone, password, csv, pagination
     app.ts · server.ts
 /docs                  ADRs, API reference
@@ -48,9 +49,9 @@ Browser ──► Next.js (client) ──► Express API (server) ──► Mong
 **User**
 
 ```
-name, email (unique, lowercase), phone (unique, E.164),
-role: 'user' | 'admin', passwordHash? (admin only),
-emailVerified, phoneVerified,
+name, email (unique, lowercase), phone? (E.164; unique where present; collected, not verified),
+role: 'user' | 'admin', passwordHash? (argon2id; users get it only after the emailed code is verified),
+googleSub? (unique where present), emailVerified, phoneVerified (unused),
 consent: { given, at, version },
 status: 'active' | 'withdrawn',
 leadStatus: 'new' | 'contacted' | 'interested' | 'closed',
@@ -91,7 +92,7 @@ name, email, phone, message, property? (ref), status, createdAt
 **Otp** (implementation detail of the OTP design)
 
 ```
-identifier (unique; normalized email or E.164 phone), channel, codeHash (HMAC), attempts, lastSentAt, expiresAt (TTL)
+identifier (unique; normalized email), channel ('email'), codeHash (HMAC), attempts, lastSentAt, expiresAt (TTL)
 ```
 
 **RefreshToken** (rotating sessions)
@@ -116,14 +117,15 @@ Public
 
 Auth
 
-- `POST /auth/signup` · `POST /auth/otp/request` · `POST /auth/otp/verify`
+- `POST /auth/signup` · `POST /auth/login` (email + password) · `POST /auth/google` (ID token)
+- `POST /auth/otp/request` · `POST /auth/otp/verify` (email code; with `password` it also sets/resets the password)
 - `POST /auth/refresh` · `POST /auth/logout` · `GET /auth/me`
 - `POST /auth/admin/login`
 
 User (auth required)
 
 - `POST /properties/:id/interest` · `DELETE /properties/:id/interest`
-- `GET /me/interests` · `PATCH /me` · `DELETE /me` (withdraw consent / delete)
+- `GET /me/interests` · `PATCH /me` (name, consent, phone) · `DELETE /me` (withdraw consent / delete)
 
 Admin (admin role)
 
@@ -141,9 +143,11 @@ Conventions
 
 ## 5. Key flows
 
-**Signup:** form → `POST /auth/signup` (with consent) → OTP sent → verify → session cookies set.
+**Signup:** form (name, email, phone, password, consent) → `POST /auth/signup` (no password sent) → code emailed → `POST /auth/otp/verify` with the code **and** the password → email verified, password stored, session cookies set. Nobody can set a password on an email address they do not control.
 
-**Interested:** click → if logged out, open signup modal and resume action after login → `POST /properties/:id/interest` → upsert interest → notify dealer (email/WhatsApp) with user details + listing link → UI confirms, button becomes "Interest sent".
+**Sign in:** `POST /auth/login` (email + password), or Google (`POST /auth/google`: ID token checked against our client ID, `email_verified` required, linked to an existing user by email, never to an admin, consent required for a new account). Forgot password = request a code, then verify it with a new password.
+
+**Interested:** click → if logged out, open the sign-in modal and resume after login → if the account has no phone (Google sign-up) ask for it once (`PATCH /me`) → `POST /properties/:id/interest` → upsert interest → email the dealer (user details, a `wa.me` WhatsApp link, the listing link) and send the user a confirmation email → UI confirms, button becomes "Interest sent". Listings also have a WhatsApp button that opens a chat with the message "Need details regarding it." and the listing link (WhatsApp shows the photo as a link preview).
 
 **Admin lead handling:** admin opens Leads → filter by property/status/date → update status, add notes → export CSV.
 

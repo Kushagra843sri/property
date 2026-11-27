@@ -15,7 +15,7 @@ Claude: run the relevant checks yourself and report real output. Never say "test
 
 **Server (priority)**
 
-- Auth: signup, OTP request/verify (expired, wrong, too many attempts), refresh, logout
+- Auth: signup, email OTP request/verify (expired, wrong, too many attempts), password sign-in and reset, Google sign-in (mocked verifier), refresh, logout
 - Authorization: user cannot access admin routes or other users' data
 - Interests: create, duplicate (idempotent), delete, requires auth
 - Properties: filters, pagination caps, sorting, hidden listings not public
@@ -33,7 +33,7 @@ Claude: run the relevant checks yourself and report real output. Never say "test
 **E2E (Playwright), critical journeys**
 
 1. Visitor browses, filters, opens a listing
-2. Visitor signs up (OTP in test mode) and clicks Interested
+2. Visitor signs up (email code read from the dev outbox) and clicks Interested
 3. Admin logs in, creates a listing with images, sees the new interest/lead, updates status, exports CSV
 4. Contact form submission reaches the admin
 
@@ -42,7 +42,7 @@ Claude: run the relevant checks yourself and report real output. Never say "test
 - Test behavior, not implementation. Descriptive names: `it('rejects OTP after 5 failed attempts')`.
 - Always include unhappy paths and edge cases, not only happy paths.
 - Use factories/fixtures for data; no shared mutable state between tests.
-- Mock external services (email, SMS, Cloudinary), never call them in tests.
+- Mock external services (email, Google, Cloudinary), never call them in tests.
 - A bug fix includes a regression test.
 
 ## 4. Manual and visual checks (UI)

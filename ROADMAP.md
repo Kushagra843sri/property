@@ -60,6 +60,17 @@ Claude: work top-down, one item at a time, tick `[x]` when the definition of don
 - [ ] Deploy (staging → production), domain, SSL, backups, monitoring
 - [ ] Handover walkthrough with client
 
+## Phase 5b — Simpler sign-in, no SMS (owner decision 2026-11-23)
+
+- [x] Email + password sign-up and login (password stored only after the emailed code is verified), forgot password via the same code
+- [x] Google sign-in (needs the owner's OAuth client ID in `GOOGLE_CLIENT_ID` and `NEXT_PUBLIC_GOOGLE_CLIENT_ID`)
+- [x] Remove SMS/Twilio and phone verification; phone is collected, optional, unique where present
+- [x] "Interested": ask a Google sign-up for a phone number first; confirmation email to the user; `wa.me` link in the dealer alert
+- [x] WhatsApp button on every listing card and detail page ("Need details regarding it." plus the listing link)
+- [ ] Create the Google OAuth client ID and set it on Render and Vercel
+- [ ] Drop the old `phone_1` index on any existing database (see `docs/deploy.md`)
+- [ ] Video links on listings (Bunny Stream embeds), pending approval of the data-model change
+
 ## Phase 6 — Ideas for later (do NOT build without approval)
 
 - [ ] Bulk email/WhatsApp promotion to consenting users
