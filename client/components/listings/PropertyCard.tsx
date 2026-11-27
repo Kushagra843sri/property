@@ -38,6 +38,7 @@ export function PropertyCard({ property: p, priority, index = 0 }: Props) {
           {p.status === 'sold' && <Badge tone="neutral">Sold</Badge>}
           {p.status === 'rented' && <Badge tone="neutral">Rented</Badge>}
           <Badge tone="neutral">{p.purpose === 'rent' ? 'For rent' : 'For sale'}</Badge>
+          {p.videoUrl && <Badge tone="forest">Video</Badge>}
         </div>
       </div>
 

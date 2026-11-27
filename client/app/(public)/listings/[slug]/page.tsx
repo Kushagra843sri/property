@@ -126,6 +126,25 @@ export default async function PropertyPage({ params }: { params: Params }) {
 
         {/* Sections below the header; on phones the contact panel sits between header and these. */}
         <div className="min-w-0 lg:col-start-1 lg:row-start-2">
+          {p.videoUrl && (
+            <section aria-labelledby="video" className="mt-8">
+              <h2 id="video" className="mb-3 text-[length:var(--text-xl)]">
+                Video tour
+              </h2>
+              <div className="aspect-video overflow-hidden rounded-lg border border-line bg-black">
+                <iframe
+                  title={`Video tour of ${p.title}`}
+                  src={p.videoUrl}
+                  loading="lazy"
+                  allow="accelerometer; gyroscope; encrypted-media; picture-in-picture"
+                  allowFullScreen
+                  referrerPolicy="no-referrer-when-downgrade"
+                  className="size-full"
+                />
+              </div>
+            </section>
+          )}
+
           <section aria-labelledby="overview" className="mt-10">
             <h2 id="overview" className="mb-2 text-[length:var(--text-xl)]">
               Overview
@@ -178,25 +197,6 @@ export default async function PropertyPage({ params }: { params: Params }) {
                   </li>
                 ))}
               </ul>
-            </section>
-          )}
-
-          {p.videoUrl && (
-            <section aria-labelledby="video" className="mt-10">
-              <h2 id="video" className="mb-3 text-[length:var(--text-xl)]">
-                Video tour
-              </h2>
-              <div className="aspect-video overflow-hidden rounded-lg border border-line bg-black">
-                <iframe
-                  title={`Video tour of ${p.title}`}
-                  src={p.videoUrl}
-                  loading="lazy"
-                  allow="accelerometer; gyroscope; encrypted-media; picture-in-picture"
-                  allowFullScreen
-                  referrerPolicy="no-referrer-when-downgrade"
-                  className="size-full"
-                />
-              </div>
             </section>
           )}
 

@@ -21,7 +21,12 @@ export const metadata: Metadata = {
   metadataBase: new URL(SITE.url),
   title: { default: `${SITE.name} | Properties`, template: `%s | ${SITE.name}` },
   description: `${SITE.name}: browse current properties for sale and rent, and talk to us directly.`,
-  openGraph: { type: 'website', siteName: SITE.name, locale: 'en_IN' },
+  openGraph: {
+    type: 'website',
+    siteName: SITE.name,
+    locale: 'en_IN',
+    images: [{ url: '/brand/logo.jpg', width: 1200, height: 1200, alt: SITE.name }],
+  },
 };
 
 export const viewport: Viewport = { themeColor: '#f5f1ea', width: 'device-width', initialScale: 1 };

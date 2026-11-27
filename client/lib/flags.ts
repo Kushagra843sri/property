@@ -3,7 +3,9 @@
  * poster is used instead and the three.js chunk is never downloaded.
  */
 export const FEATURES = {
-  hero3d: true,
+  // Off: the wireframe boxes overlapped the poster's buildings and read as clutter. The clean
+  // static poster is used instead.
+  hero3d: false,
   // Price range filter and price sort are hidden: the owner negotiates prices, so they are not
   // revealed up front. The code stays in place; set this to true to bring them back.
   priceFilters: false,
