@@ -1,5 +1,6 @@
 import { OAuth2Client } from 'google-auth-library';
 import { env } from '../config/env.js';
+import { logger } from '../utils/logger.js';
 
 export interface GoogleIdentity {
   sub: string;
@@ -26,8 +27,13 @@ const real: GoogleVerifier = async (credential) => {
       emailVerified: p.email_verified === true,
       name: p.name ?? '',
     };
-  } catch {
-    return null; // bad/expired/forged token: one generic outcome
+  } catch (err) {
+    // The caller still gets one generic outcome; the reason (never the token) goes to the log.
+    logger.warn(
+      { reason: err instanceof Error ? err.message : 'unknown' },
+      'google token rejected',
+    );
+    return null;
   }
 };
 
