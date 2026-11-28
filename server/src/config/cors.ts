@@ -8,6 +8,6 @@ export const corsMiddleware = cors({
   },
   credentials: true,
   methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'X-CSRF-Token'],
+  allowedHeaders: ['Content-Type', 'X-CSRF-Token', 'X-File-Name'],
   maxAge: 600,
 });

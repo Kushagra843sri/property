@@ -2,6 +2,12 @@ import { Router } from 'express';
 import { requireAdmin } from '../../middleware/auth.js';
 import { validate } from '../../middleware/validate.js';
 import { imageUpload } from '../../middleware/upload.js';
+import { videoLimiter } from '../../middleware/rateLimit.js';
+import { ALLOWED_VIDEO_MIME } from '../../config/constants.js';
+import { env } from '../../config/env.js';
+import { getVideoStore } from '../../providers/videoStore.js';
+import { AppError } from '../../utils/errors.js';
+import { VideoGuard } from '../../utils/videoGuard.js';
 import * as leads from './leadsService.js';
 import * as props from './propertiesService.js';
 import { audit } from './audit.js';
@@ -147,4 +153,54 @@ adminRouter.get('/export/leads.csv', async (req, res) => {
 
 adminRouter.get('/stats', async (_req, res) => {
   res.json({ data: await leads.stats() });
+});
+
+const safeDecode = (v: string) => {
+  try {
+    return decodeURIComponent(v);
+  } catch {
+    return '';
+  }
+};
+
+/**
+ * Upload a listing video from the admin's computer. The raw file is the request body (not a form),
+ * so it streams through to Bunny and is never held in memory. Returns the player link to save.
+ */
+adminRouter.post('/video', videoLimiter, async (req, res) => {
+  const store = getVideoStore();
+  if (!store)
+    throw new AppError(
+      503,
+      'video_unavailable',
+      'Video upload is not set up yet. Paste a Bunny video link instead.',
+    );
+  const type = String(req.headers['content-type'] ?? '')
+    .split(';')[0]!
+    .trim();
+  if (!(ALLOWED_VIDEO_MIME as readonly string[]).includes(type))
+    throw AppError.badRequest('Only MP4, MOV or WebM videos are allowed');
+  const size = Number(req.headers['content-length']);
+  const maxBytes = env.MAX_VIDEO_MB * 1024 * 1024;
+  if (!Number.isFinite(size) || size <= 0)
+    throw new AppError(411, 'length_required', 'Missing file size');
+  if (size > maxBytes)
+    throw new AppError(413, 'too_large', `That video is larger than ${env.MAX_VIDEO_MB} MB`);
+
+  const rawName = String(req.headers['x-file-name'] ?? '');
+  const title =
+    safeDecode(rawName)
+      .replace(/[^\w .()-]/g, '')
+      .slice(0, 100) || 'Listing video';
+  const guard = new VideoGuard(maxBytes);
+  let failure: unknown;
+  guard.once('error', (e) => (failure = e));
+  req.once('error', (e) => guard.destroy(e));
+  try {
+    const videoUrl = await store.upload(req.pipe(guard), size, title);
+    await audit(adminId(req), 'video.upload', 'video', undefined, { bytes: size });
+    res.status(201).json({ data: { videoUrl } });
+  } catch (err) {
+    throw failure ?? err; // the guard's clear message (wrong type, too large) beats a generic upload error
+  }
 });

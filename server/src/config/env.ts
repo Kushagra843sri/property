@@ -41,6 +41,10 @@ const schema = z
     CLOUDINARY_API_KEY: z.string().optional(),
     CLOUDINARY_API_SECRET: z.string().optional(),
     CLOUDINARY_FOLDER: z.string().default('properties'),
+    // Video uploads go to Bunny Stream. Without a key the admin can still paste a video link.
+    BUNNY_API_KEY: z.string().optional(),
+    BUNNY_LIBRARY_ID: z.string().regex(/^\d+$/).optional(),
+    MAX_VIDEO_MB: z.coerce.number().int().min(1).max(2000).default(200),
   })
   .superRefine((env, ctx) => {
     const need = (cond: boolean, path: string, msg: string) =>

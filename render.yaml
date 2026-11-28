@@ -40,6 +40,9 @@ services:
         value: cloudinary
       - key: CLOUDINARY_CLOUD_NAME
         value: mvh26fyw
+      # The video library id is public. BUNNY_API_KEY is a secret: add it in the Render dashboard.
+      - key: BUNNY_LIBRARY_ID
+        value: 823842
       - key: JWT_ACCESS_SECRET
         generateValue: true
       - key: JWT_REFRESH_SECRET

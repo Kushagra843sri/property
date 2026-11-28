@@ -18,6 +18,7 @@ export const MAX_IMAGES_PER_PROPERTY = 20;
 export const VIDEO_URL_PATTERN =
   /^https:\/\/(?:iframe|player)\.mediadelivery\.net\/(?:embed|play)\/\d+\/[0-9a-f-]{36}(?:\?[\w=&.%-]*)?$/;
 export const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
+export const ALLOWED_VIDEO_MIME = ['video/mp4', 'video/quicktime', 'video/webm'] as const;
 export const ALLOWED_IMAGE_MIME = ['image/jpeg', 'image/png', 'image/webp'] as const;
 
 export const COOKIE_ACCESS = 'access_token';

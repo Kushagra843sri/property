@@ -8,7 +8,7 @@ import { Interest } from '../src/models/interest.js';
 import { Property } from '../src/models/property.js';
 import { User } from '../src/models/user.js';
 import { setImageStore, getImageStore } from '../src/providers/imageStore.js';
-import { MAX_IMAGES_PER_PROPERTY } from '../src/config/constants.js';
+import { MAX_IMAGES_PER_PROPERTY, VIDEO_URL_PATTERN } from '../src/config/constants.js';
 
 useTestDb();
 const AD = '/api/v1/admin';
@@ -25,6 +25,7 @@ describe('admin authorization', () => {
   const routes: [string, string][] = [
     ['get', '/properties'],
     ['post', '/properties'],
+    ['post', '/video'],
     ['get', '/users'],
     ['get', '/interests'],
     ['get', '/enquiries'],
@@ -461,5 +462,52 @@ describe('admin leads', () => {
     expect(res.body.data.properties).toEqual({ available: 1, sold: 1 });
     expect(res.body.data.topProperties[0]).toMatchObject({ title: 'Top pick', interests: 1 });
     expect(res.body.data.recentLeads).toHaveLength(1);
+  });
+});
+
+describe('admin video upload', () => {
+  const mp4 = (bytes: number) => {
+    const b = Buffer.alloc(bytes);
+    b.writeUInt32BE(24, 0);
+    b.write('ftypmp42', 4, 'latin1');
+    return b;
+  };
+  const upload = async (
+    session: Awaited<ReturnType<typeof loginAdmin>>['session'],
+    type: string,
+    body: Buffer,
+  ) =>
+    session
+      .postRaw(`${AD}/video`)
+      .set('Content-Type', type)
+      .set('X-File-Name', 'My%20flat.mp4')
+      .send(body);
+
+  it('streams a real video through and returns a player link that listings accept', async () => {
+    const { session } = await loginAdmin();
+    const r = await upload(session, 'video/mp4', mp4(50_000));
+    expect(r.status).toBe(201);
+    expect(r.body.data.videoUrl).toMatch(VIDEO_URL_PATTERN);
+    expect(
+      (await session.post(`${AD}/properties`, { ...newProp, videoUrl: r.body.data.videoUrl }))
+        .status,
+    ).toBe(201);
+    expect(await AuditLog.countDocuments({ action: 'video.upload' })).toBe(1);
+  });
+
+  it('refuses a wrong type, a file that is not a video, and a file over the size limit', async () => {
+    const { session } = await loginAdmin();
+    expect((await upload(session, 'application/pdf', mp4(5_000))).status).toBe(400);
+    expect((await upload(session, 'video/mp4', Buffer.alloc(5_000, 7))).status).toBe(400); // wrong bytes
+    expect((await upload(session, 'video/mp4', mp4(2 * 1024 * 1024))).status).toBe(413); // limit is 1 MB in tests
+  });
+
+  it('refuses customers and anonymous callers', async () => {
+    const { session } = await signUpAndLogin();
+    const r = await session
+      .postRaw(`${AD}/video`)
+      .set('Content-Type', 'video/mp4')
+      .send(mp4(5_000));
+    expect(r.status).toBe(403);
   });
 });
