@@ -277,7 +277,7 @@ export default function HeroScene({ active, onReady }: Props) {
   return (
     <Canvas
       frameloop={active ? 'always' : 'never'}
-      dpr={[1, 1.75]}
+      dpr={[1, 1.5]}
       camera={{ position: [0, 2.4, 11.5], fov: 32 }}
       gl={{ alpha: true, antialias: true, powerPreference: 'low-power' }}
       style={{ touchAction: 'pan-y' }}

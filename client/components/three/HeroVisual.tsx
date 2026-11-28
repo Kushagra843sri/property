@@ -10,20 +10,19 @@ import { cn } from '@/lib/cn';
 const HeroScene = dynamic(() => import('./HeroScene'), { ssr: false });
 
 /**
- * 3D is an enhancement for large, capable screens only. Phones, small tablets, low-memory or
- * low-core devices, data-saver and reduced-motion users keep the static poster, and never download
- * the three.js chunk (it costs ~130 KB and ~1.4 s of main-thread time on a throttled phone).
+ * 3D runs on phones and laptops alike. Data-saver, reduced-motion, no-WebGL and very weak devices
+ * keep the static poster and never download the three.js chunk (~130 KB).
  */
 function canUse3d(): boolean {
   if (!FEATURES.hero3d || typeof window === 'undefined') return false;
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return false;
-  if (!window.matchMedia('(min-width: 1024px) and (hover: hover)').matches) return false;
   const nav = navigator as Navigator & {
     deviceMemory?: number;
     connection?: { saveData?: boolean };
   };
   if (nav.connection?.saveData) return false;
-  if ((nav.deviceMemory ?? 8) < 4 || (nav.hardwareConcurrency ?? 8) < 6) return false;
+  // shortcut: only very weak phones (under 2 GB / 2 cores) keep the poster; raise if phones stutter.
+  if ((nav.deviceMemory ?? 8) < 2 || (nav.hardwareConcurrency ?? 8) < 2) return false;
   try {
     const c = document.createElement('canvas');
     return !!(c.getContext('webgl2') || c.getContext('webgl'));
