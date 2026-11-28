@@ -12,7 +12,7 @@ export default function NewListing() {
       <PageHeader title="New listing" />
       <PropertyForm
         onSaved={(p) => {
-          toast.success('Listing created. Now add photos.');
+          toast.success('Listing created.');
           router.push(`/admin/listings/${p.id}`);
         }}
       />

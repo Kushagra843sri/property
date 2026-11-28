@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { ArrowDown, ArrowUp, Trash2, Upload } from 'lucide-react';
 import { toast } from 'sonner';
 import { ApiError, api } from '@/lib/api';
@@ -8,8 +8,8 @@ import type { AdminProperty } from '@/lib/types';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Field';
 import { PropertyImage } from '@/components/listings/PropertyImage';
-
-const MAX_MB = 5;
+import { PHOTO_MAX_PER_LISTING } from '@/lib/media';
+import { MediaPickerDialog } from './MediaPickerDialog';
 
 export function ImageManager({
   property,
@@ -19,7 +19,7 @@ export function ImageManager({
   onChange: (p: AdminProperty) => void;
 }) {
   const base = `/admin/properties/${property.id}/images`;
-  const input = useRef<HTMLInputElement>(null);
+  const [picking, setPicking] = useState(false);
   const [busy, setBusy] = useState(false);
   const [confirming, setConfirming] = useState<string | null>(null);
   const images = [...property.images].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
@@ -27,23 +27,20 @@ export function ImageManager({
   const fail = (err: unknown) =>
     toast.error(err instanceof ApiError ? err.message : 'Something went wrong.');
 
-  async function upload(files: FileList | null) {
-    if (!files?.length || busy) return;
-    const list = [...files];
-    const tooBig = list.find((f) => f.size > MAX_MB * 1024 * 1024);
-    if (tooBig) return void toast.error(`${tooBig.name} is larger than ${MAX_MB} MB.`);
+  async function upload(files: File[]) {
+    if (!files.length || busy) return;
     const fd = new FormData();
-    list.forEach((f) => fd.append('images', f));
+    files.forEach((f) => fd.append('images', f));
     setBusy(true);
     try {
       const res = await api<AdminProperty>(base, { method: 'POST', formData: fd });
       onChange(res.data);
-      toast.success(`${list.length} photo${list.length > 1 ? 's' : ''} added.`);
+      setPicking(false);
+      toast.success(`${files.length} photo${files.length > 1 ? 's' : ''} added.`);
     } catch (err) {
       fail(err);
     } finally {
       setBusy(false);
-      if (input.current) input.current.value = '';
     }
   }
 
@@ -100,24 +97,21 @@ export function ImageManager({
         <h2 id="photos" className="text-[length:var(--text-xl)]">
           Photos ({images.length})
         </h2>
-        <div>
-          <input
-            ref={input}
-            id="photo-input"
-            type="file"
-            multiple
-            accept="image/jpeg,image/png,image/webp"
-            className="sr-only"
-            onChange={(e) => upload(e.target.files)}
-          />
-          <Button variant="secondary" loading={busy} onClick={() => input.current?.click()}>
-            <Upload size={18} aria-hidden /> Add photos
-          </Button>
-        </div>
+        <Button variant="secondary" onClick={() => setPicking(true)}>
+          <Upload size={18} aria-hidden /> Add photos
+        </Button>
       </div>
+      <MediaPickerDialog
+        open={picking}
+        onClose={() => (busy ? undefined : setPicking(false))}
+        kind="photo"
+        maxFiles={PHOTO_MAX_PER_LISTING - images.length}
+        onPick={upload}
+        busy={busy}
+      />
       <p className="mb-4 text-sm text-muted">
-        JPG, PNG or WebP, up to {MAX_MB} MB each. The first photo is the cover. Location data is
-        removed from every photo.
+        JPG, PNG or WebP, up to 5 MB each. The first photo is the cover. Location data is removed
+        from every photo.
       </p>
       {images.length === 0 ? (
         <p className="rounded-lg border border-line bg-raised p-8 text-center text-muted">

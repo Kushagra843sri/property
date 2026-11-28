@@ -67,6 +67,49 @@ function refreshSession(): Promise<boolean> {
   return refreshing;
 }
 
+/**
+ * Upload one file as the raw request body (used for videos, which stream through the API).
+ * XMLHttpRequest, because fetch cannot report upload progress.
+ */
+export function uploadFile<T>(
+  path: string,
+  file: File,
+  onProgress: (percent: number) => void,
+): Promise<ApiResult<T>> {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', `${API_URL}${path}`);
+    xhr.withCredentials = true;
+    xhr.setRequestHeader('Content-Type', file.type);
+    xhr.setRequestHeader('X-File-Name', encodeURIComponent(file.name));
+    xhr.setRequestHeader('X-CSRF-Token', csrf());
+    xhr.upload.onprogress = (e) => {
+      if (e.lengthComputable) onProgress(Math.round((e.loaded / e.total) * 100));
+    };
+    xhr.onload = () => {
+      let body: { data?: T; error?: { code?: string; message?: string } } | null = null;
+      try {
+        body = JSON.parse(xhr.responseText);
+      } catch {
+        /* not JSON */
+      }
+      if (xhr.status >= 200 && xhr.status < 300 && body?.data !== undefined)
+        resolve(body as ApiResult<T>);
+      else
+        reject(
+          new ApiError(
+            xhr.status,
+            body?.error?.code ?? 'error',
+            body?.error?.message ?? 'The upload failed. Please try again.',
+          ),
+        );
+    };
+    xhr.onerror = () =>
+      reject(new ApiError(0, 'network', 'Could not reach the server. Check your connection.'));
+    xhr.send(file);
+  });
+}
+
 export interface RequestOptions {
   method?: 'GET' | 'POST' | 'PATCH' | 'DELETE';
   body?: unknown;

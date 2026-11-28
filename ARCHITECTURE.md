@@ -120,6 +120,7 @@ Auth
 - `POST /auth/signup` · `POST /auth/login` (email + password) · `POST /auth/google` (ID token)
 - `POST /auth/otp/request` · `POST /auth/otp/verify` (email code; with `password` it also sets/resets the password)
 - `POST /auth/refresh` · `POST /auth/logout` · `GET /auth/me`
+- Admin media: `POST /admin/properties/:id/images` (photos, multipart) and `POST /admin/video` (a video streamed to Bunny Stream, returns the player link).
 - There is no separate admin login: an admin signs in with `POST /auth/login` like everyone else and the role in the session decides access.
 
 User (auth required)

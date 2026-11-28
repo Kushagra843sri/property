@@ -34,17 +34,29 @@ Press any number to go to that list.
    - **Price in rupees**: type the number only, for example `22000` or `8500000`. Choose **Per month** for rent.
    - **City** is required. **Locality** helps people find it.
    - Other details (area, floor, furnishing, amenities, description) are optional but make the listing better. Separate amenities with commas.
-3. Press **Create listing**. You then land on the listing's page, where you add photos.
+3. Press **Create listing**. You then land on the listing's page, where you can change the photos and the video.
 
 ## Adding photos
 
-1. On the listing's page, scroll to **Photos** and press **Add photos**.
-2. Pick one or more pictures (JPG, PNG or WebP, up to 5 MB each, up to 20 per listing).
+You can add photos while creating a listing (the **Photos** box on the form) or later on the listing's page.
+
+1. Press **Add photos**. A box opens.
+2. Drag pictures into the box, or press **Browse files on this computer** and choose them. Check the small previews, remove any you do not want, then press **Add photos**.
+   Pick one or more pictures (JPG, PNG or WebP, up to 5 MB each, up to 20 per listing).
 3. The **first photo is the cover** shown on the list. Use the **up and down arrows** to change the order.
 4. Type a short description under each photo, for example "living room". This helps people who use screen readers and helps Google.
 5. To delete a photo press **Remove**, then **Yes, remove**.
 
 Tip: take photos in daylight, landscape (wide) orientation. Location information is automatically removed from photos for your privacy.
+
+## Adding a video
+
+1. On the listing's form, find **Video** and press **Upload a video from this computer**.
+2. Drag the video into the box, or press **Browse files on this computer**. MP4, MOV or WebM, up to 200 MB. Press **Upload video** and wait for the bar to finish.
+3. The video link fills in by itself. Press **Save changes** (or **Create listing**) to keep it.
+4. A new video can take a minute or two to be ready to play; until then the player says it is processing.
+
+If you already have a link from the video library you can paste it into the **Video** box instead.
 
 ## Changing a property: sold, rented, hidden, featured
 

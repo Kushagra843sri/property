@@ -142,9 +142,12 @@ test('3. admin creates a listing with a photo, sees the new lead and interest, u
   await page.getByRole('button', { name: 'Create listing' }).click();
   await expect(page).toHaveURL(/\/admin\/listings\/[0-9a-f]{24}$/);
 
-  await page
-    .locator('#photo-input')
+  await page.getByRole('button', { name: 'Add photos' }).click();
+  const picker = page.getByRole('dialog');
+  await picker
+    .getByLabel(/from your computer/i)
     .setInputFiles({ name: 'shop.png', mimeType: 'image/png', buffer: PNG });
+  await picker.getByRole('button', { name: 'Add 1 photo' }).click();
   await expect(page.getByRole('heading', { name: 'Photos (1)' })).toBeVisible();
 
   // A visitor registers interest in it.
@@ -176,4 +179,41 @@ test('3. admin creates a listing with a photo, sees the new lead and interest, u
     (await anon.request.get('http://localhost:4000/api/v1/admin/export/leads.csv')).status(),
   ).toBe(401);
   await anon.close();
+});
+
+test('5. admin adds photos and a video from the computer while creating a listing', async ({
+  page,
+}) => {
+  await adminSignIn(page);
+  await page.goto('/admin/listings/new');
+  await page.getByLabel('Title').fill(`E2E Picker ${Date.now()}`);
+  await page.getByLabel('Property type').selectOption('room');
+  await page.getByLabel('City').fill('Sample City');
+
+  // Photos: browse the computer, review, confirm; they wait in the form.
+  await page.getByRole('button', { name: 'Add photos' }).click();
+  const photos = page.getByRole('dialog');
+  await photos
+    .getByLabel(/from your computer/i)
+    .setInputFiles({ name: 'room.png', mimeType: 'image/png', buffer: PNG });
+  await expect(photos.getByText('room.png')).toBeVisible();
+  await photos.getByRole('button', { name: 'Add 1 photo' }).click();
+  await expect(page.getByAltText(/Chosen photo 1/)).toBeVisible();
+
+  // Video: the same dialog; the link box is filled in after the upload.
+  await page.getByRole('button', { name: 'Upload a video from this computer' }).click();
+  const video = page.getByRole('dialog');
+  const mp4 = Buffer.alloc(4096);
+  mp4.writeUInt32BE(24, 0);
+  mp4.write('ftypmp42', 4, 'latin1');
+  await video
+    .getByLabel(/from your computer/i)
+    .setInputFiles({ name: 'tour.mp4', mimeType: 'video/mp4', buffer: mp4 });
+  await video.getByRole('button', { name: 'Upload video' }).click();
+  await expect(page.getByLabel('Video (optional)')).toHaveValue(/mediadelivery\.net\/embed\//);
+
+  await page.getByRole('button', { name: 'Create listing' }).click();
+  await expect(page).toHaveURL(/\/admin\/listings\/[0-9a-f]{24}$/);
+  await expect(page.getByRole('heading', { name: 'Photos (1)' })).toBeVisible(); // uploaded after saving
+  await expect(page.getByLabel('Video (optional)')).toHaveValue(/mediadelivery\.net\/embed\//);
 });

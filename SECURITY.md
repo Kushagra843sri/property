@@ -53,6 +53,7 @@ This site stores **personal data** (names, phone numbers, emails, interests) and
 - Admin-only. Check MIME type **and** magic bytes, extension allow-list (jpg, png, webp), max size (e.g. 5MB), max count per listing.
 - Upload to Cloudinary/S3 via signed/server-side upload; never serve user files from the app server's disk.
 - Strip EXIF/location metadata. Randomized filenames.
+- Videos (`POST /admin/video`): admin-only, CSRF-protected, rate-limited (10 per 15 min). The file type is checked by its declared type **and** its first bytes (MP4/MOV/WebM), the size is capped (`MAX_VIDEO_MB`, default 200) both by the declared length and while streaming, and the bytes stream straight to Bunny Stream, never to disk or memory. The Bunny API key lives only in the server's environment; the browser never sees it. Every upload is audit-logged.
 
 ## 7. Data protection and privacy (India — DPDP Act 2023 mindset)
 

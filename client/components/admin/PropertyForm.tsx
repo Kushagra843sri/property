@@ -1,12 +1,15 @@
 'use client';
 
 import { useState, type FormEvent } from 'react';
+import { toast } from 'sonner';
 import { ApiError, api } from '@/lib/api';
 import { typeLabel } from '@/lib/format';
 import { useApi } from '@/lib/useApi';
 import type { AdminProperty, AreaOption } from '@/lib/types';
 import { Button } from '@/components/ui/Button';
 import { Field, Input, Select, Textarea } from '@/components/ui/Field';
+import { StagedPhotos } from './StagedPhotos';
+import { VideoField } from './VideoField';
 
 const TYPES = [
   'flat',
@@ -42,8 +45,27 @@ export function PropertyForm({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [formError, setFormError] = useState('');
   const [busy, setBusy] = useState(false);
+  const [staged, setStaged] = useState<File[]>([]); // photos chosen before the listing exists
   const isFlat = type === 'flat';
   const areas = useApi<AreaOption[]>('/properties/areas');
+
+  /** A photo needs the listing to exist, so photos chosen on the new-listing page go up right after it saves. */
+  async function uploadStaged(created: AdminProperty) {
+    const fd = new FormData();
+    staged.forEach((f) => fd.append('images', f));
+    try {
+      const res = await api<AdminProperty>(`/admin/properties/${created.id}/images`, {
+        method: 'POST',
+        formData: fd,
+      });
+      return res.data;
+    } catch {
+      toast.error(
+        'The listing was saved, but its photos could not be uploaded. Add them on the next page.',
+      );
+      return created;
+    }
+  }
 
   async function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -108,7 +130,7 @@ export function PropertyForm({
       const res = initial
         ? await api<AdminProperty>(`/admin/properties/${initial.id}`, { method: 'PATCH', body })
         : await api<AdminProperty>('/admin/properties', { method: 'POST', body });
-      onSaved(res.data);
+      onSaved(!initial && staged.length > 0 ? await uploadStaged(res.data) : res.data);
     } catch (err) {
       if (err instanceof ApiError) {
         const fe: Record<string, string> = {};
@@ -325,21 +347,8 @@ export function PropertyForm({
       >
         {(a) => <Input {...a} name="amenities" defaultValue={d?.amenities.join(', ')} />}
       </Field>
-      <Field
-        label="Video link (optional)"
-        error={errors.videoUrl}
-        hint="Bunny Stream player link, for example https://iframe.mediadelivery.net/embed/123456/video-id"
-      >
-        {(a) => (
-          <Input
-            {...a}
-            name="videoUrl"
-            type="url"
-            maxLength={300}
-            defaultValue={d?.videoUrl ?? ''}
-          />
-        )}
-      </Field>
+      {!initial && <StagedPhotos files={staged} onChange={setStaged} />}
+      <VideoField defaultValue={d?.videoUrl} error={errors.videoUrl} />
       <Field label="Description">
         {(a) => (
           <Textarea
