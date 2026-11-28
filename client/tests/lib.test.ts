@@ -162,3 +162,10 @@ describe('videoThumb', () => {
     expect(videoThumb('https://evil.example/embed/1/' + id)).toBeUndefined();
   });
 });
+
+describe('site contact details', () => {
+  it('links to the Instagram profile without any share-tracking part', () => {
+    expect(SITE.instagram.url).toBe('https://www.instagram.com/shreeshyamproperty768');
+    expect(SITE.instagram.url).not.toContain('?');
+  });
+});

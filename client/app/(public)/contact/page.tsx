@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Clock, Mail, MapPin, MessageCircle, Phone } from 'lucide-react';
+import { InstagramIcon } from '@/components/ui/InstagramIcon';
 import { EnquiryForm } from '@/components/forms/EnquiryForm';
 import { SITE, whatsappLink } from '@/lib/site';
 
@@ -42,6 +43,9 @@ export default async function ContactPage({ searchParams }: { searchParams: Sear
             </a>
             <a href={`mailto:${SITE.email}`} className={row}>
               <Mail size={18} aria-hidden /> {SITE.email}
+            </a>
+            <a href={SITE.instagram.url} className={row} target="_blank" rel="noopener noreferrer">
+              <InstagramIcon /> Instagram {SITE.instagram.handle}
             </a>
             <a href={SITE.mapUrl} className={row} target="_blank" rel="noopener noreferrer">
               <MapPin size={18} aria-hidden /> Find our shop on Google Maps

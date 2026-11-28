@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { Clock, Mail, MapPin, MessageCircle, Phone } from 'lucide-react';
+import { InstagramIcon } from '@/components/ui/InstagramIcon';
 import { NAV, SITE, whatsappLink } from '@/lib/site';
 import { Wordmark } from './Wordmark';
 
@@ -28,6 +29,9 @@ export function Footer() {
           </a>
           <a href={`mailto:${SITE.email}`} className={row}>
             <Mail size={18} aria-hidden /> {SITE.email}
+          </a>
+          <a href={SITE.instagram.url} className={row} rel="noopener noreferrer" target="_blank">
+            <InstagramIcon /> Instagram
           </a>
           <a href={SITE.mapUrl} className={row} rel="noopener noreferrer" target="_blank">
             <MapPin size={18} aria-hidden /> Find us on Google Maps

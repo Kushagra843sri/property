@@ -26,6 +26,10 @@ export const SITE = {
   phoneHref: phoneEntry(PHONE_DIGITS[0]).href,
   whatsappNumber: `91${WHATSAPP_DIGITS}`,
   email: 'shyamshree1233@gmail.com',
+  instagram: {
+    url: 'https://www.instagram.com/shreeshyamproperty768',
+    handle: '@shreeshyamproperty768',
+  },
   mapUrl: 'https://goo.gl/maps/UQ1mAEAHvRVKA77u9?g_st=aw', // the street address is not supplied yet
   hours: [{ days: 'Every day', time: '9:00 am to 9:00 pm' }],
   // PLACEHOLDER: dealer bio and photo for the About page
